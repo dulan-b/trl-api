@@ -74,6 +74,10 @@ export async function handleMuxWebhook(
         await handleUploadAssetCreated(event.data, request);
         break;
 
+      case 'video.asset.track.ready':
+        await handleTrackReady(event.data, request);
+        break;
+
       case 'video.live_stream.active':
       case 'video.live_stream.idle':
         await handleLiveStreamStatusChange(event.data, request);
@@ -298,6 +302,56 @@ async function handleUploadAssetCreated(data: any, request: FastifyRequest) {
       updated_at = NOW()
     WHERE mux_upload_id = ${uploadId}
   `;
+}
+
+/**
+ * Handle track ready event (when captions are generated)
+ */
+async function handleTrackReady(data: any, request: FastifyRequest) {
+  const assetId = data.id;
+  const track = data.tracks?.find((t: any) => t.type === 'text' && t.status === 'ready');
+
+  if (!track) {
+    request.log.info({ assetId }, 'Track ready event but no ready text track found');
+    return;
+  }
+
+  request.log.info({ assetId, trackId: track.id, language: track.language_code }, 'Caption track ready');
+
+  // Use JSON storage in dev mode
+  if (config.NODE_ENV === 'development') {
+    const store = await loadVideos();
+    const video = store.videos.find((v: any) => v.muxAssetId === assetId);
+
+    if (video) {
+      // Process caption translation
+      captionService.processCaptionGeneration(video.id, assetId).catch(error => {
+        request.log.error({ error, videoId: video.id }, 'Caption generation failed');
+      });
+
+      request.log.info({ videoId: video.id }, 'Started caption translation');
+    }
+    return;
+  }
+
+  // Production: Use database
+  const [video] = await sql`
+    SELECT id, mux_asset_id
+    FROM video_assets
+    WHERE mux_asset_id = ${assetId}
+  `;
+
+  if (!video) {
+    request.log.warn({ assetId }, 'Video not found for track ready event');
+    return;
+  }
+
+  // Process caption translation
+  captionService.processCaptionGeneration(video.id, assetId).catch(error => {
+    request.log.error({ error, videoId: video.id }, 'Caption generation failed');
+  });
+
+  request.log.info({ videoId: video.id }, 'Started caption translation');
 }
 
 /**
