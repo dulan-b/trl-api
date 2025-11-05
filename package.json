@@ -1,0 +1,23 @@
+{
+  "name": "trl-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Ready Lab - Video Platform API",
+  "scripts": {
+    "dev:api": "pnpm --filter @trl/api dev",
+    "dev:worker": "pnpm --filter @trl/worker dev",
+    "dev": "pnpm run dev:api & pnpm run dev:worker",
+    "build": "pnpm -r build",
+    "clean": "pnpm -r clean",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.12.0",
+  "dependencies": {
+    "translate": "^3.0.1"
+  }
+}

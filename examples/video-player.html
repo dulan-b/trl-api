@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRL Video Player - Test</title>
+  <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .video-container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .video-js {
+      width: 100%;
+      height: 500px;
+    }
+    .info {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 4px;
+      border-left: 4px solid #2196f3;
+    }
+    .code {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 The Ready Lab - Video Player Test</h1>
+
+  <div class="video-container">
+    <video
+      id="trl-video"
+      class="video-js vjs-default-skin"
+      controls
+      preload="auto"
+    >
+      <!-- Replace with your actual video playback URL -->
+      <source src="YOUR_MUX_PLAYBACK_URL" type="application/x-mpegURL">
+
+      <!-- English captions -->
+      <track
+        kind="captions"
+        src="YOUR_ENGLISH_CAPTION_URL"
+        srclang="en"
+        label="English"
+        default>
+
+      <!-- Spanish captions (when available) -->
+      <track
+        kind="captions"
+        src="YOUR_SPANISH_CAPTION_URL"
+        srclang="es"
+        label="Español">
+    </video>
+  </div>
+
+  <div class="info">
+    <h3>📝 How to use this player:</h3>
+    <ol>
+      <li>Create a video via the API: <code>POST /api/videos/uploads</code></li>
+      <li>Upload your video file to the provided upload URL</li>
+      <li>Wait for processing (check <code>GET /api/videos/:id</code>)</li>
+      <li>Replace <code>YOUR_MUX_PLAYBACK_URL</code> with the <code>playbackUrl</code></li>
+      <li>Replace <code>YOUR_ENGLISH_CAPTION_URL</code> with the caption <code>vttUrl</code></li>
+      <li>Open this HTML file in a browser</li>
+    </ol>
+
+    <h3>🎯 Features:</h3>
+    <ul>
+      <li>✅ HLS streaming via Mux</li>
+      <li>✅ Multi-language captions (EN + ES)</li>
+      <li>✅ Caption toggle in player</li>
+      <li>✅ Responsive design</li>
+      <li>✅ Keyboard controls</li>
+    </ul>
+
+    <h3>💡 Example API Response:</h3>
+    <div class="code">
+<pre>{
+  "id": "uuid",
+  "title": "Course Introduction",
+  "playbackUrl": "https://stream.mux.com/[PLAYBACK-ID].m3u8",
+  "thumbnailUrl": "https://image.mux.com/[PLAYBACK-ID]/thumbnail.jpg",
+  "captions": [
+    {
+      "language": "en",
+      "vttUrl": "https://[storage]/captions/[id]/en.vtt"
+    }
+  ]
+}</pre>
+    </div>
+  </div>
+
+  <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
+  <script>
+    // Initialize Video.js player
+    const player = videojs('trl-video', {
+      controls: true,
+      autoplay: false,
+      preload: 'auto',
+      fluid: true,
+      playbackRates: [0.5, 1, 1.25, 1.5, 2],
+      html5: {
+        vhs: {
+          overrideNative: true
+        },
+        nativeTextTracks: false
+      }
+    });
+
+    // Player events
+    player.on('ready', function() {
+      console.log('Player ready!');
+    });
+
+    player.on('loadedmetadata', function() {
+      console.log('Video metadata loaded');
+      console.log('Duration:', player.duration(), 'seconds');
+    });
+
+    player.on('texttrackchange', function() {
+      const track = player.textTracks().tracks_.find(t => t.mode === 'showing');
+      if (track) {
+        console.log('Caption language:', track.language);
+      }
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      // Spacebar: Play/Pause
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+        if (player.paused()) {
+          player.play();
+        } else {
+          player.pause();
+        }
+      }
+
+      // Left Arrow: Rewind 5 seconds
+      if (e.code === 'ArrowLeft') {
+        player.currentTime(player.currentTime() - 5);
+      }
+
+      // Right Arrow: Forward 5 seconds
+      if (e.code === 'ArrowRight') {
+        player.currentTime(player.currentTime() + 5);
+      }
+
+      // F: Toggle fullscreen
+      if (e.code === 'KeyF') {
+        if (player.isFullscreen()) {
+          player.exitFullscreen();
+        } else {
+          player.requestFullscreen();
+        }
+      }
+
+      // C: Toggle captions
+      if (e.code === 'KeyC') {
+        const tracks = player.textTracks();
+        for (let i = 0; i < tracks.length; i++) {
+          if (tracks[i].mode === 'showing') {
+            tracks[i].mode = 'hidden';
+            console.log('Captions hidden');
+            return;
+          }
+        }
+        // If none showing, show first track
+        if (tracks.length > 0) {
+          tracks[0].mode = 'showing';
+          console.log('Captions shown');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
