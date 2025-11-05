@@ -1,7 +1,7 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { sql } from '../config/database.js';
-import { captionQueue } from '../config/queue.js';
 import * as muxService from '../services/mux.js';
+import * as captionService from '../services/captions.js';
 import { VideoStatus } from '@trl/shared';
 import { getEnvConfig } from '@trl/shared';
 import * as fs from 'fs/promises';
@@ -166,14 +166,13 @@ async function handleAssetReady(data: any, request: FastifyRequest) {
     return;
   }
 
-  // Queue caption generation for English
-  await captionQueue.add('generate-captions', {
-    videoAssetId: video.id,
-    muxAssetId: assetId,
-    language: 'en',
+  // Process caption generation directly (English + Spanish translation)
+  // Run in background without blocking the webhook response
+  captionService.processCaptionGeneration(video.id, assetId).catch(error => {
+    request.log.error({ error, videoId: video.id }, 'Caption generation failed');
   });
 
-  request.log.info({ videoId: video.id }, 'Queued caption generation');
+  request.log.info({ videoId: video.id }, 'Started caption generation');
 }
 
 /**
