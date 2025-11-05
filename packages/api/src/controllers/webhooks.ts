@@ -363,6 +363,25 @@ async function handleLiveStreamStatusChange(data: any, request: FastifyRequest) 
 
   request.log.info({ streamId, status }, 'Live stream status changed');
 
+  // Use JSON storage in dev mode
+  if (config.NODE_ENV === 'development') {
+    const store = await loadVideos();
+    const stream = store.liveStreams?.find((s: any) => s.muxStreamId === streamId);
+
+    if (stream) {
+      stream.status = status;
+      stream.updatedAt = new Date().toISOString();
+      if (status === 'active' && !stream.startedAt) {
+        stream.startedAt = new Date().toISOString();
+      }
+      await saveVideos(store);
+    }
+
+    request.log.info({ streamId, status }, 'Live stream status updated in JSON (dev mode)');
+    return;
+  }
+
+  // Production: Use database
   await sql`
     UPDATE live_streams
     SET
