@@ -36,5 +36,9 @@ export interface LiveStreamResponse {
   status: LiveStreamStatus;
   streamKey?: string;
   playbackUrl?: string;
+  // For web streaming (Cloudflare Stream with WHIP)
+  whipUrl?: string;
+  // For RTMP streaming (OBS/encoder)
+  rtmpUrl?: string;
   createdAt: string;
 }

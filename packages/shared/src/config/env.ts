@@ -15,6 +15,13 @@ export interface EnvConfig {
   MUX_TOKEN_SECRET: string;
   MUX_WEBHOOK_SECRET: string;
 
+  // Cloudflare Stream (for web-based live streaming)
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_API_TOKEN?: string;
+
+  // Streaming Provider ('mux' or 'cloudflare')
+  STREAM_PROVIDER: 'mux' | 'cloudflare';
+
   // Storage (Supabase or S3)
   STORAGE_PROVIDER: 'supabase' | 's3';
   STORAGE_ENDPOINT?: string;
@@ -42,6 +49,11 @@ export function getEnvConfig(): EnvConfig {
     MUX_TOKEN_ID: process.env.MUX_TOKEN_ID || '',
     MUX_TOKEN_SECRET: process.env.MUX_TOKEN_SECRET || '',
     MUX_WEBHOOK_SECRET: process.env.MUX_WEBHOOK_SECRET || '',
+
+    CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+    CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
+
+    STREAM_PROVIDER: (process.env.STREAM_PROVIDER as 'mux' | 'cloudflare') || 'mux',
 
     STORAGE_PROVIDER: (process.env.STORAGE_PROVIDER as 'supabase' | 's3') || 'supabase',
     STORAGE_ENDPOINT: process.env.STORAGE_ENDPOINT,

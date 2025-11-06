@@ -1,11 +1,42 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { sql } from '../config/database.js';
-import * as muxService from '../services/mux.js';
+import * as streamingService from '../services/streaming.js';
 import {
   LiveStreamStatus,
   type CreateLiveStreamRequest,
   type LiveStreamResponse,
+  getEnvConfig,
 } from '@trl/shared';
+import * as fs from 'fs/promises';
+import * as path from 'path';
+
+const config = getEnvConfig();
+
+// JSON storage helpers for dev mode (test_dev/data/)
+const DATA_DIR = path.join(process.cwd(), '../..', 'test_dev', 'data');
+const DATA_FILE = path.join(DATA_DIR, 'videos.json');
+
+async function ensureDataDir() {
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+  } catch (err) {
+    // Directory already exists
+  }
+}
+
+async function loadData() {
+  try {
+    const data = await fs.readFile(DATA_FILE, 'utf-8');
+    return JSON.parse(data);
+  } catch (err) {
+    return { videos: [], liveStreams: [] };
+  }
+}
+
+async function saveData(data: any) {
+  await ensureDataDir();
+  await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
+}
 
 /**
  * Create a new live stream
@@ -20,12 +51,61 @@ export async function createLiveStream(
   const { title, description, educatorId } = request.body;
 
   try {
-    // Create Mux live stream
-    const { streamId, streamKey, playbackId } = await muxService.createLiveStream({
+    // Create live stream (uses Mux or Cloudflare based on STREAM_PROVIDER)
+    const stream = await streamingService.createLiveStream({
       playbackPolicy: ['public'],
+      metadata: {
+        title,
+        description: description || '',
+        educatorId,
+      },
     });
 
-    // Create live stream record in database
+    const { streamId, streamKey, playbackUrl, whipUrl, rtmpUrl } = stream;
+
+    // Use JSON storage in dev mode
+    if (config.NODE_ENV === 'development') {
+      const store = await loadData();
+
+      const streamRecord = {
+        id: `stream_${Date.now()}`,
+        title,
+        description: description || null,
+        educatorId,
+        streamId,
+        streamKey,
+        playbackUrl,
+        whipUrl, // For web streaming (Cloudflare only)
+        rtmpUrl, // For OBS/encoder streaming
+        status: LiveStreamStatus.IDLE,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (!store.liveStreams) {
+        store.liveStreams = [];
+      }
+      store.liveStreams.push(streamRecord);
+      await saveData(store);
+
+      request.log.info({ streamId: streamRecord.id, providerStreamId: streamId }, 'Created live stream (dev mode)');
+
+      const response: LiveStreamResponse = {
+        id: streamRecord.id,
+        title: streamRecord.title,
+        description: streamRecord.description,
+        status: streamRecord.status,
+        streamKey,
+        playbackUrl,
+        whipUrl, // Include WHIP URL if available
+        rtmpUrl, // Include RTMP URL for OBS
+        createdAt: streamRecord.createdAt,
+      };
+
+      return reply.code(201).send(response);
+    }
+
+    // Production: Use database
     const [stream] = await sql`
       INSERT INTO live_streams (
         title,
@@ -82,6 +162,34 @@ export async function getLiveStreamById(
   const { id } = request.params;
 
   try {
+    // Use JSON storage in dev mode
+    if (config.NODE_ENV === 'development') {
+      const store = await loadData();
+      const stream = store.liveStreams?.find((s: any) => s.id === id);
+
+      if (!stream) {
+        return reply.code(404).send({
+          error: 'Not Found',
+          message: 'Live stream not found',
+        });
+      }
+
+      const response: LiveStreamResponse = {
+        id: stream.id,
+        title: stream.title,
+        description: stream.description,
+        status: stream.status,
+        streamKey: stream.muxStreamKey,
+        playbackUrl: stream.muxPlaybackId
+          ? `https://stream.mux.com/${stream.muxPlaybackId}.m3u8`
+          : undefined,
+        createdAt: stream.createdAt,
+      };
+
+      return reply.send(response);
+    }
+
+    // Production: Use database
     const [stream] = await sql`
       SELECT *
       FROM live_streams
