@@ -106,7 +106,7 @@ export async function createLiveStream(
     }
 
     // Production: Use database
-    const [stream] = await sql`
+    const [dbStream] = await sql`
       INSERT INTO live_streams (
         title,
         description,
@@ -122,22 +122,24 @@ export async function createLiveStream(
         ${educatorId},
         ${streamId},
         ${streamKey},
-        ${playbackId},
+        ${streamId},
         ${LiveStreamStatus.IDLE}
       )
       RETURNING id, title, description, status, created_at
     `;
 
-    request.log.info({ streamId: stream.id, muxStreamId: streamId }, 'Created live stream');
+    request.log.info({ streamId: dbStream.id, providerStreamId: streamId }, 'Created live stream');
 
     const response: LiveStreamResponse = {
-      id: stream.id,
-      title: stream.title,
-      description: stream.description,
-      status: stream.status,
+      id: dbStream.id,
+      title: dbStream.title,
+      description: dbStream.description,
+      status: dbStream.status,
       streamKey,
-      playbackUrl: `https://stream.mux.com/${playbackId}.m3u8`,
-      createdAt: stream.created_at,
+      playbackUrl,
+      whipUrl,
+      rtmpUrl,
+      createdAt: dbStream.created_at,
     };
 
     return reply.code(201).send(response);
@@ -165,9 +167,9 @@ export async function getLiveStreamById(
     // Use JSON storage in dev mode
     if (config.NODE_ENV === 'development') {
       const store = await loadData();
-      const stream = store.liveStreams?.find((s: any) => s.id === id);
+      const foundStream = store.liveStreams?.find((s: any) => s.id === id);
 
-      if (!stream) {
+      if (!foundStream) {
         return reply.code(404).send({
           error: 'Not Found',
           message: 'Live stream not found',
@@ -175,28 +177,28 @@ export async function getLiveStreamById(
       }
 
       const response: LiveStreamResponse = {
-        id: stream.id,
-        title: stream.title,
-        description: stream.description,
-        status: stream.status,
-        streamKey: stream.muxStreamKey,
-        playbackUrl: stream.muxPlaybackId
-          ? `https://stream.mux.com/${stream.muxPlaybackId}.m3u8`
-          : undefined,
-        createdAt: stream.createdAt,
+        id: foundStream.id,
+        title: foundStream.title,
+        description: foundStream.description,
+        status: foundStream.status,
+        streamKey: foundStream.streamKey,
+        playbackUrl: foundStream.playbackUrl,
+        whipUrl: foundStream.whipUrl,
+        rtmpUrl: foundStream.rtmpUrl,
+        createdAt: foundStream.createdAt,
       };
 
       return reply.send(response);
     }
 
     // Production: Use database
-    const [stream] = await sql`
+    const [dbStream] = await sql`
       SELECT *
       FROM live_streams
       WHERE id = ${id}
     `;
 
-    if (!stream) {
+    if (!dbStream) {
       return reply.code(404).send({
         error: 'Not Found',
         message: 'Live stream not found',
@@ -204,16 +206,16 @@ export async function getLiveStreamById(
     }
 
     const response: LiveStreamResponse = {
-      id: stream.id,
-      title: stream.title,
-      description: stream.description,
-      status: stream.status,
+      id: dbStream.id,
+      title: dbStream.title,
+      description: dbStream.description,
+      status: dbStream.status,
       // Only include stream key for the owner
-      streamKey: stream.mux_stream_key,
-      playbackUrl: stream.mux_playback_id
-        ? `https://stream.mux.com/${stream.mux_playback_id}.m3u8`
+      streamKey: dbStream.mux_stream_key,
+      playbackUrl: dbStream.mux_playback_id
+        ? `https://stream.mux.com/${dbStream.mux_playback_id}.m3u8`
         : undefined,
-      createdAt: stream.created_at,
+      createdAt: dbStream.created_at,
     };
 
     return reply.send(response);
