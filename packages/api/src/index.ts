@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { getEnvConfig } from '@trl/shared';
@@ -10,6 +11,13 @@ import { courseRoutes } from './routes/courses.js';
 import { lessonRoutes } from './routes/lessons.js';
 import { enrollmentRoutes } from './routes/enrollments.js';
 import { quizRoutes } from './routes/quizzes.js';
+import { profileRoutes } from './routes/profiles.js';
+import { trackRoutes } from './routes/tracks.js';
+import { moduleRoutes } from './routes/modules.js';
+import { notificationRoutes } from './routes/notifications.js';
+import { certificationRoutes } from './routes/certifications.js';
+import { communityRoutes } from './routes/communities.js';
+import { productRoutes } from './routes/products.js';
 
 const config = getEnvConfig();
 
@@ -77,10 +85,17 @@ await fastify.register(videoRoutes, { prefix: '/api/videos' });
 await fastify.register(webhookRoutes, { prefix: '/api/webhooks' });
 await fastify.register(liveRoutes, { prefix: '/api/live' });
 await fastify.register(userRoutes, { prefix: '/api/users' });
+await fastify.register(profileRoutes, { prefix: '/api/profiles' });
+await fastify.register(trackRoutes, { prefix: '/api/tracks' });
+await fastify.register(moduleRoutes, { prefix: '/api/modules' });
 await fastify.register(courseRoutes, { prefix: '/api/courses' });
 await fastify.register(lessonRoutes, { prefix: '/api/lessons' });
 await fastify.register(enrollmentRoutes, { prefix: '/api/enrollments' });
 await fastify.register(quizRoutes, { prefix: '/api/quizzes' });
+await fastify.register(notificationRoutes, { prefix: '/api/notifications' });
+await fastify.register(certificationRoutes, { prefix: '/api/certifications' });
+await fastify.register(communityRoutes, { prefix: '/api/communities' });
+await fastify.register(productRoutes, { prefix: '/api/products' });
 
 // 404 handler
 fastify.setNotFoundHandler((request, reply) => {

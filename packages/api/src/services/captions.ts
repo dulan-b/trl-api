@@ -6,20 +6,33 @@ import { sql } from '../config/database.js';
 import { CaptionStatus } from '@trl/shared';
 import pino from 'pino';
 
-const config = getEnvConfig();
 const logger = pino({ level: 'info' });
 
 // Configure translate package to use Google Translate
 translate.engine = 'google';
 
-// Mux client
-const mux = new Mux({
-  tokenId: config.MUX_TOKEN_ID,
-  tokenSecret: config.MUX_TOKEN_SECRET,
-});
+// Lazy initialization to ensure env vars are loaded
+let mux: Mux | null = null;
+let supabase: any = null;
 
-// Supabase client for VTT storage
-const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY);
+function getMuxClient() {
+  if (!mux) {
+    const config = getEnvConfig();
+    mux = new Mux({
+      tokenId: config.MUX_TOKEN_ID,
+      tokenSecret: config.MUX_TOKEN_SECRET,
+    });
+  }
+  return mux;
+}
+
+function getSupabaseClient() {
+  if (!supabase) {
+    const config = getEnvConfig();
+    supabase = createClient(config.SUPABASE_URL, config.SUPABASE_SERVICE_KEY);
+  }
+  return supabase;
+}
 
 /**
  * Download VTT file from URL
@@ -103,6 +116,8 @@ export async function uploadVTTToStorage(
   assetId: string,
   language: string
 ): Promise<string> {
+  const config = getEnvConfig();
+  const supabase = getSupabaseClient();
   const filePath = `captions/${assetId}-${language}.vtt`;
 
   const { data, error } = await supabase.storage
@@ -141,6 +156,9 @@ export async function processCaptionGeneration(
   muxAssetId: string
 ): Promise<void> {
   logger.info({ videoAssetId, muxAssetId }, 'Starting caption generation');
+
+  const config = getEnvConfig();
+  const mux = getMuxClient();
 
   try {
     // Step 1: Get the asset to find the English caption track

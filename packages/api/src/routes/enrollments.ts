@@ -21,8 +21,8 @@ export async function enrollmentRoutes(fastify: FastifyInstance) {
     handler: getEnrollmentById,
   });
 
-  // List student's enrollments
-  fastify.get('/student/:studentId', {
+  // List user's enrollments
+  fastify.get('/user/:studentId', {
     onRequest: [optionalAuth],
     handler: listStudentEnrollments,
   });

@@ -10,12 +10,12 @@ import {
  */
 export async function createLesson(
   request: FastifyRequest<{
-    Body: CreateLessonRequest & { courseId: string };
+    Body: CreateLessonRequest & { moduleId: string };
   }>,
   reply: FastifyReply
 ) {
   const {
-    courseId,
+    moduleId,
     title,
     description,
     lessonType,
@@ -29,7 +29,7 @@ export async function createLesson(
   try {
     const [lesson] = await sql`
       INSERT INTO lessons (
-        course_id,
+        module_id,
         title,
         description,
         lesson_type,
@@ -40,7 +40,7 @@ export async function createLesson(
         is_free_preview
       )
       VALUES (
-        ${courseId},
+        ${moduleId},
         ${title},
         ${description || null},
         ${lessonType},
@@ -53,7 +53,7 @@ export async function createLesson(
       RETURNING *
     `;
 
-    request.log.info({ lessonId: lesson.id, courseId }, 'Lesson created');
+    request.log.info({ lessonId: lesson.id, moduleId }, 'Lesson created');
 
     return reply.code(201).send({
       id: lesson.id,
@@ -66,7 +66,7 @@ export async function createLesson(
     if (error.code === '23505') { // Unique violation (order_index)
       return reply.code(409).send({
         error: 'Conflict',
-        message: 'A lesson with this order index already exists for this course',
+        message: 'A lesson with this order index already exists for this module',
       });
     }
     request.log.error(error, 'Failed to create lesson');
@@ -102,7 +102,7 @@ export async function getLessonById(
 
     return reply.send({
       id: lesson.id,
-      courseId: lesson.course_id,
+      moduleId: lesson.module_id,
       title: lesson.title,
       description: lesson.description,
       lessonType: lesson.lesson_type,
@@ -245,29 +245,29 @@ export async function deleteLesson(
 }
 
 /**
- * List lessons for a course
+ * List lessons for a module
  */
 export async function listLessons(
   request: FastifyRequest<{
     Querystring: {
-      courseId: string;
+      moduleId: string;
     };
   }>,
   reply: FastifyReply
 ) {
-  const { courseId } = request.query;
+  const { moduleId } = request.query;
 
-  if (!courseId) {
+  if (!moduleId) {
     return reply.code(400).send({
       error: 'Bad Request',
-      message: 'courseId is required',
+      message: 'moduleId is required',
     });
   }
 
   try {
     const lessons = await sql`
       SELECT * FROM lessons
-      WHERE course_id = ${courseId}
+      WHERE module_id = ${moduleId}
       ORDER BY order_index ASC
     `;
 
