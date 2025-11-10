@@ -217,6 +217,28 @@
           }
         },
         {
+          "name": "Create Course with Lessons",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"educatorId\": \"educator-uuid-here\",\n  \"title\": \"Complete Web Development Course\",\n  \"description\": \"Learn HTML, CSS, and JavaScript from scratch\",\n  \"courseType\": \"deep_learning\",\n  \"teachingStyle\": [\"hands-on\", \"project-based\"],\n  \"language\": \"en\",\n  \"price\": 99.99,\n  \"isFree\": false,\n  \"thumbnailUrl\": \"https://example.com/course-thumb.jpg\",\n  \"lessons\": [\n    {\n      \"title\": \"Introduction to HTML\",\n      \"description\": \"Learn HTML basics\",\n      \"lessonType\": \"video\",\n      \"videoAssetId\": \"mux-asset-id-here\",\n      \"orderIndex\": 1,\n      \"duration\": 900,\n      \"isFreePreview\": true\n    },\n    {\n      \"title\": \"HTML Syntax Guide\",\n      \"description\": \"Detailed guide to HTML syntax\",\n      \"lessonType\": \"reading\",\n      \"contentMarkdown\": \"# HTML Syntax\\n\\n## Tags and Elements\\n...\",\n      \"orderIndex\": 2,\n      \"isFreePreview\": false\n    },\n    {\n      \"title\": \"HTML Basics Quiz\",\n      \"description\": \"Test your HTML knowledge\",\n      \"lessonType\": \"quiz\",\n      \"orderIndex\": 3,\n      \"quiz\": {\n        \"passingScore\": 70,\n        \"maxAttempts\": 3,\n        \"questions\": [\n          {\n            \"question\": \"What does HTML stand for?\",\n            \"options\": [\"Hyper Text Markup Language\", \"High Tech Modern Language\", \"Home Tool Markup Language\"],\n            \"correctAnswer\": 0,\n            \"explanation\": \"HTML stands for Hyper Text Markup Language\"\n          }\n        ]\n      }\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/courses/with-lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses", "with-lessons"]
+            },
+            "description": "Create a course with lessons (videos, text, quizzes) all at once. TODO: Add authentication to ensure only educators can create courses."
+          }
+        },
+        {
           "name": "Get Course by ID",
           "request": {
             "method": "GET",

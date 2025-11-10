@@ -411,6 +411,175 @@ export async function listCourses(
 }
 
 /**
+ * Create a course with lessons in one transaction
+ * Allows creating videos, text content, and quizzes all at once
+ *
+ * TODO: Add authentication to ensure only educators can create courses
+ */
+export async function createCourseWithLessons(
+  request: FastifyRequest<{
+    Body: CreateCourseRequest & {
+      educatorId: string;
+      lessons?: Array<{
+        title: string;
+        description?: string;
+        lessonType: 'video' | 'reading' | 'quiz';
+        videoAssetId?: string;
+        contentMarkdown?: string;
+        orderIndex: number;
+        duration?: number;
+        isFreePreview?: boolean;
+        quiz?: {
+          passingScore: number;
+          maxAttempts: number;
+          questions: Array<{
+            question: string;
+            options: string[];
+            correctAnswer: number;
+            explanation?: string;
+          }>;
+        };
+      }>;
+    };
+  }>,
+  reply: FastifyReply
+) {
+  const {
+    educatorId,
+    title,
+    description,
+    courseType,
+    teachingStyle = [],
+    language = 'en',
+    price = 0,
+    isFree = false,
+    thumbnailUrl,
+    lessons = [],
+  } = request.body;
+
+  try {
+    // Begin transaction by creating the course first
+    const [course] = await sql`
+      INSERT INTO courses (
+        educator_id,
+        title,
+        description,
+        course_type,
+        teaching_style,
+        language,
+        price,
+        is_free,
+        thumbnail_url
+      )
+      VALUES (
+        ${educatorId},
+        ${title},
+        ${description || null},
+        ${courseType},
+        ${sql.array(teachingStyle)},
+        ${language},
+        ${price},
+        ${isFree},
+        ${thumbnailUrl || null}
+      )
+      RETURNING *
+    `;
+
+    request.log.info({ courseId: course.id, educatorId }, 'Course created');
+
+    const createdLessons = [];
+
+    // Create each lesson
+    for (const lesson of lessons) {
+      const [createdLesson] = await sql`
+        INSERT INTO lessons (
+          course_id,
+          title,
+          description,
+          lesson_type,
+          video_asset_id,
+          content_markdown,
+          order_index,
+          duration,
+          is_free_preview
+        )
+        VALUES (
+          ${course.id},
+          ${lesson.title},
+          ${lesson.description || null},
+          ${lesson.lessonType},
+          ${lesson.videoAssetId || null},
+          ${lesson.contentMarkdown || null},
+          ${lesson.orderIndex},
+          ${lesson.duration || null},
+          ${lesson.isFreePreview || false}
+        )
+        RETURNING *
+      `;
+
+      // If this is a quiz lesson, create the quiz
+      if (lesson.lessonType === 'quiz' && lesson.quiz) {
+        const [quiz] = await sql`
+          INSERT INTO quizzes (
+            lesson_id,
+            passing_score,
+            max_attempts,
+            questions
+          )
+          VALUES (
+            ${createdLesson.id},
+            ${lesson.quiz.passingScore},
+            ${lesson.quiz.maxAttempts},
+            ${sql.json(lesson.quiz.questions)}
+          )
+          RETURNING *
+        `;
+
+        createdLessons.push({
+          ...createdLesson,
+          quiz: {
+            id: quiz.id,
+            passingScore: quiz.passing_score,
+            maxAttempts: quiz.max_attempts,
+          },
+        });
+      } else {
+        createdLessons.push(createdLesson);
+      }
+    }
+
+    request.log.info(
+      { courseId: course.id, lessonCount: createdLessons.length },
+      'Course with lessons created'
+    );
+
+    return reply.code(201).send({
+      course: {
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        courseType: course.course_type,
+        isPublished: course.is_published,
+        createdAt: course.created_at,
+      },
+      lessons: createdLessons.map((l) => ({
+        id: l.id,
+        title: l.title,
+        lessonType: l.lesson_type,
+        orderIndex: l.order_index,
+        ...(l.quiz && { quiz: l.quiz }),
+      })),
+    });
+  } catch (error) {
+    request.log.error(error, 'Failed to create course with lessons');
+    return reply.code(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to create course with lessons',
+    });
+  }
+}
+
+/**
  * Publish a course
  */
 export async function publishCourse(

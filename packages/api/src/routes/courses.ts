@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import {
   createCourse,
+  createCourseWithLessons,
   getCourseById,
   updateCourse,
   deleteCourse,
@@ -10,7 +11,13 @@ import {
 import { optionalAuth } from '../middleware/auth.js';
 
 export async function courseRoutes(fastify: FastifyInstance) {
-  // Create course
+  // Create course with lessons (videos, text, quizzes)
+  fastify.post('/with-lessons', {
+    onRequest: [optionalAuth],
+    handler: createCourseWithLessons,
+  });
+
+  // Create course (metadata only)
   fastify.post('/', {
     onRequest: [optionalAuth],
     handler: createCourse,
