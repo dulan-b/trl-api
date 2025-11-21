@@ -109,9 +109,15 @@ fastify.setNotFoundHandler((request, reply) => {
 fastify.setErrorHandler((error, request, reply) => {
   request.log.error(error);
 
+  // In production, don't expose internal error details to clients
+  const isProduction = config.NODE_ENV === 'production';
+
   reply.code(error.statusCode || 500).send({
     error: error.name || 'Internal Server Error',
-    message: error.message || 'An unexpected error occurred',
+    // Only expose detailed error messages in development
+    message: isProduction && error.statusCode >= 500
+      ? 'An unexpected error occurred'
+      : error.message || 'An unexpected error occurred',
   });
 });
 

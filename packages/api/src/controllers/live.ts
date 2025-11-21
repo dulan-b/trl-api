@@ -154,14 +154,22 @@ export async function createLiveStream(
 
 /**
  * Get live stream by ID
+ *
+ * SECURITY NOTE: Stream keys are sensitive credentials that allow anyone to broadcast
+ * to your stream. They should ONLY be returned to the stream owner (educator).
+ *
+ * TODO: Add authentication middleware to verify the requesting user is the educator
+ * who created this stream before returning sensitive streaming credentials.
  */
 export async function getLiveStreamById(
   request: FastifyRequest<{
     Params: { id: string };
+    Querystring: { includeStreamKey?: string };
   }>,
   reply: FastifyReply
 ) {
   const { id } = request.params;
+  const { includeStreamKey } = request.query;
 
   try {
     // Use JSON storage in dev mode
@@ -176,15 +184,18 @@ export async function getLiveStreamById(
         });
       }
 
+      // In dev mode, require explicit query param to get stream keys
+      // TODO: Add proper auth check - verify user owns this stream
       const response: LiveStreamResponse = {
         id: foundStream.id,
         title: foundStream.title,
         description: foundStream.description,
         status: foundStream.status,
-        streamKey: foundStream.streamKey,
+        // Only include sensitive credentials if explicitly requested
+        streamKey: includeStreamKey === 'true' ? foundStream.streamKey : undefined,
         playbackUrl: foundStream.playbackUrl,
-        whipUrl: foundStream.whipUrl,
-        rtmpUrl: foundStream.rtmpUrl,
+        whipUrl: includeStreamKey === 'true' ? foundStream.whipUrl : undefined,
+        rtmpUrl: includeStreamKey === 'true' ? foundStream.rtmpUrl : undefined,
         createdAt: foundStream.createdAt,
       };
 
@@ -205,16 +216,20 @@ export async function getLiveStreamById(
       });
     }
 
+    // TODO: Verify request.user.id === dbStream.educator_id before returning keys
+    // For now, require explicit query param (not secure, fix with auth)
     const response: LiveStreamResponse = {
       id: dbStream.id,
       title: dbStream.title,
       description: dbStream.description,
       status: dbStream.status,
-      // Only include stream key for the owner
-      streamKey: dbStream.mux_stream_key,
+      // Only include sensitive streaming credentials if explicitly requested
+      streamKey: includeStreamKey === 'true' ? dbStream.mux_stream_key : undefined,
       playbackUrl: dbStream.mux_playback_id
         ? `https://stream.mux.com/${dbStream.mux_playback_id}.m3u8`
         : undefined,
+      whipUrl: includeStreamKey === 'true' ? dbStream.whip_url : undefined,
+      rtmpUrl: includeStreamKey === 'true' ? dbStream.rtmp_url : undefined,
       createdAt: dbStream.created_at,
     };
 
