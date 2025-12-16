@@ -151,7 +151,7 @@ export async function getUserBookmarks(
 }
 
 /**
- * Create bookmark
+ * Toggle bookmark - adds if not exists, removes if exists
  */
 export async function createBookmark(
   request: FastifyRequest<{ Body: CreateBookmarkBody }>,
@@ -160,18 +160,28 @@ export async function createBookmark(
   try {
     const { user_id, bookmarkable_type, bookmarkable_id } = request.body;
 
+    // Check if bookmark already exists
+    const existing = await sql`
+      SELECT id FROM bookmarks
+      WHERE user_id = ${user_id}
+        AND bookmarkable_type = ${bookmarkable_type}
+        AND bookmarkable_id = ${bookmarkable_id}
+    `;
+
+    if (existing.length > 0) {
+      // Remove existing bookmark
+      await sql`DELETE FROM bookmarks WHERE id = ${existing[0].id}`;
+      return reply.send({ bookmarked: false, message: 'Bookmark removed' });
+    }
+
+    // Add new bookmark
     const result = await sql`
       INSERT INTO bookmarks (user_id, bookmarkable_type, bookmarkable_id)
       VALUES (${user_id}, ${bookmarkable_type}, ${bookmarkable_id})
-      ON CONFLICT (user_id, bookmarkable_type, bookmarkable_id) DO NOTHING
       RETURNING *
     `;
 
-    if (result.length === 0) {
-      return reply.code(409).send({ error: 'Conflict', message: 'Already bookmarked' });
-    }
-
-    return reply.code(201).send(result[0]);
+    return reply.code(201).send({ bookmarked: true, bookmark: result[0] });
   } catch (error: any) {
     request.log.error(error);
     return reply.code(500).send({ error: 'Internal Server Error', message: error.message });

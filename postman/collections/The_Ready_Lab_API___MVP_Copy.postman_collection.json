@@ -1,7 +1,7 @@
 {
   "info": {
-    "_postman_id": "805ab4e8-8ac7-4472-8fd8-638d3a48efb1",
-    "name": "The Ready Lab API - MVP",
+    "_postman_id": "de4c37d6-c79c-422f-bcf3-2834710b8560",
+    "name": "The Ready Lab API - Dev Env",
     "description": "Complete API collection for The Ready Lab educational platform with Neon PostgreSQL integration.\n\nUpdated: December 15, 2025 - Added include parameter endpoints for complex queries.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -362,7 +362,7 @@
           }
         }
       ],
-      "id": "7d0c7543-1e8c-4ce1-8e80-738d49ee89a1",
+      "id": "b664efde-28ba-44bd-9137-500c888afd0e",
       "description": "Pre-configured requests using seeded test data. Run seed-test-data.sql first."
     },
     {
@@ -394,7 +394,7 @@
           }
         }
       ],
-      "id": "d746e4fc-00aa-46d1-844d-147772a74e48"
+      "id": "d91742d2-63f2-4804-a4a1-4eb8dcad9e2f"
     },
     {
       "name": "Profiles",
@@ -460,7 +460,7 @@
           }
         }
       ],
-      "id": "0237ea7a-1a8d-4309-8a3e-eb3b364f36cd"
+      "id": "66121392-830f-43e4-8602-5fe2890de215"
     },
     {
       "name": "User Roles",
@@ -526,7 +526,7 @@
           }
         }
       ],
-      "id": "0eb87e85-d840-4377-b415-52997c09d4ee"
+      "id": "b9d4bb83-5847-448b-8098-6adc5a6baa75"
     },
     {
       "name": "User Interests",
@@ -622,7 +622,7 @@
           }
         }
       ],
-      "id": "fd9fe448-d846-456a-b8ad-2184b4f2c9e8"
+      "id": "6ef908bf-b27f-4489-a6aa-c38b3d22c169"
     },
     {
       "name": "Tracks",
@@ -697,7 +697,7 @@
           }
         }
       ],
-      "id": "6b6d46d6-89d6-4a09-b801-9d4231ce21f3"
+      "id": "2b273333-85f1-4893-8f71-4610364098e0"
     },
     {
       "name": "Modules",
@@ -754,7 +754,7 @@
           }
         }
       ],
-      "id": "28799d74-1301-4f60-89a3-ad3e1572e5c8"
+      "id": "2f3d3a8b-15c5-4516-857c-c60b0ec17c35"
     },
     {
       "name": "Lessons",
@@ -924,7 +924,7 @@
           }
         }
       ],
-      "id": "f8fe8116-518f-46c5-a65e-68672c08fd90"
+      "id": "d72a14f2-0cc7-43ce-92b9-d58a53bffad7"
     },
     {
       "name": "Enrollments",
@@ -1006,7 +1006,7 @@
           }
         }
       ],
-      "id": "ba5f3516-29df-460c-818a-e10bd6255189"
+      "id": "330cf7f0-7ee6-4e82-a372-3787d1b654bc"
     },
     {
       "name": "Bookmarks",
@@ -1149,7 +1149,7 @@
           }
         }
       ],
-      "id": "065948d0-5e6b-4de4-9688-5528b7ed78b2"
+      "id": "f88a9250-e889-4f91-a784-a1801571686c"
     },
     {
       "name": "Communities",
@@ -1382,7 +1382,7 @@
           }
         }
       ],
-      "id": "14d3d92c-9de8-4933-a20d-5eb1ca673cbb"
+      "id": "e6e185c7-1611-48b6-996d-de9f3874c29c"
     },
     {
       "name": "Posts",
@@ -1763,7 +1763,7 @@
           }
         }
       ],
-      "id": "a7651e89-a30a-4512-aa03-3d86cfbd0bcd"
+      "id": "19e73cbd-c3eb-42cc-835e-28203f3687d1"
     },
     {
       "name": "Live Events",
@@ -1939,7 +1939,7 @@
           }
         }
       ],
-      "id": "62de1983-128d-436a-8d1b-6738742681c5"
+      "id": "4e15f99d-3b4d-4529-b2ee-fadadec23901"
     },
     {
       "name": "Subscriptions",
@@ -2071,7 +2071,7 @@
           }
         }
       ],
-      "id": "875b8f46-4a78-4f05-b8bd-17d0af7a4581"
+      "id": "6a7ddaa2-9d40-43ff-b9cf-74c9acbf97ce"
     },
     {
       "name": "Stripe Connect",
@@ -2156,7 +2156,7 @@
           }
         }
       ],
-      "id": "29af63c4-8f78-417e-bf78-39fa55a7ddeb"
+      "id": "2bcf0c3e-4222-4a88-80fd-7e453da153df"
     },
     {
       "name": "Admin",
@@ -2294,7 +2294,7 @@
           }
         }
       ],
-      "id": "06bedf02-f360-423a-870d-413f9ca8b9ca"
+      "id": "1d8fbc95-2408-4d7c-9a9f-65bfa84888fa"
     },
     {
       "name": "Notifications",
@@ -2352,7 +2352,7 @@
           }
         }
       ],
-      "id": "e8978114-b625-4ca3-9216-692a0c9c0917"
+      "id": "5911bacc-0b5c-4649-b2a8-06b897bae54c"
     },
     {
       "name": "Certifications",
@@ -2409,7 +2409,7 @@
           }
         }
       ],
-      "id": "1da1d03d-c94a-44c1-8979-99dd384f0237"
+      "id": "3faa7387-593f-4555-b31a-bb6a65c38b99"
     },
     {
       "name": "Products",
@@ -2458,7 +2458,7 @@
           }
         }
       ],
-      "id": "6eaa56d8-27d0-43f6-896d-842918d8da77"
+      "id": "d8397d1b-c161-422b-838f-95d8bc7be090"
     },
     {
       "name": "Purchases",
@@ -2518,7 +2518,7 @@
           }
         }
       ],
-      "id": "503b6456-5458-4dd8-85e9-96ccb70d2a91"
+      "id": "576c746b-4b70-45b4-9435-3a5e975788d6"
     },
     {
       "name": "Institutions",
@@ -2603,11 +2603,11 @@
           }
         }
       ],
-      "id": "96f827cf-e433-4dbd-8703-e7ebf84823ea"
+      "id": "af1a73ca-9b55-4e11-a1ec-e4fd5a6b0ffb"
     },
     {
       "name": "Health Check",
-      "id": "9ea24d30-3629-4a5a-993f-459b8e758142",
+      "id": "e908f122-b066-4ef1-849f-6d0d1eec11ff",
       "request": {
         "method": "GET",
         "url": {
@@ -2625,22 +2625,22 @@
   ],
   "variable": [
     {
-      "id": "7727b835-23a7-45a5-a07c-edc4e7d22c9a",
+      "id": "ec098adf-cd56-40aa-84e2-0a7172c0ea24",
       "key": "baseUrl",
       "value": "http://localhost:4000"
     },
     {
-      "id": "6bb2e50b-28ce-4982-8841-8a19db769434",
+      "id": "4603b458-0fee-4a1e-a9df-fbfb68cdf7f1",
       "key": "userId",
       "value": "user-uuid-here"
     },
     {
-      "id": "c6e125d9-db8d-41c4-9ad3-681653977802",
+      "id": "95276d70-5ee2-4904-b034-a4d2b0f1e972",
       "key": "postId",
       "value": "post-uuid-here"
     },
     {
-      "id": "f4e36823-d7fb-4133-89b4-33d5ac7522e3",
+      "id": "3bbd59d3-7635-4ef2-a797-58d647fc28ab",
       "key": "communityId",
       "value": "community-uuid-here"
     }
