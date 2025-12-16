@@ -13,26 +13,22 @@ interface LiveEventParams {
 interface CreateLiveEventBody {
   title: string;
   description?: string;
-  instructor_id: string;
-  scheduled_at?: string;
-  duration_minutes?: number;
+  host_id: string;
+  scheduled_start: string;
+  scheduled_end: string;
   status?: 'scheduled' | 'live' | 'completed' | 'cancelled';
-  is_recording?: boolean;
-  max_attendees?: number;
-  meeting_url?: string;
-  track_id?: string;
+  stream_url?: string;
+  max_participants?: number;
 }
 
 interface UpdateLiveEventBody {
   title?: string;
   description?: string;
   status?: string;
-  is_recording?: boolean;
-  viewer_count?: number;
-  attendee_count?: number;
-  recording_url?: string;
-  started_at?: string;
-  ended_at?: string;
+  stream_url?: string;
+  max_participants?: number;
+  actual_start?: string;
+  actual_end?: string;
 }
 
 /**
@@ -41,9 +37,8 @@ interface UpdateLiveEventBody {
 export async function listLiveEvents(
   request: FastifyRequest<{
     Querystring: {
-      instructor_id?: string;
+      host_id?: string;
       status?: string;
-      track_id?: string;
       limit?: number;
       offset?: number;
     };
@@ -51,46 +46,38 @@ export async function listLiveEvents(
   reply: FastifyReply
 ) {
   try {
-    const { instructor_id, status, track_id, limit = 50, offset = 0 } = request.query;
+    const { host_id, status, limit = 50, offset = 0 } = request.query;
 
-    let query;
-    if (instructor_id && status) {
-      query = sql`
+    let events;
+    if (host_id && status) {
+      events = await sql`
         SELECT * FROM live_events
-        WHERE instructor_id = ${instructor_id} AND status = ${status}
-        ORDER BY scheduled_at DESC
+        WHERE host_id = ${host_id} AND status = ${status}
+        ORDER BY scheduled_start DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
-    } else if (instructor_id) {
-      query = sql`
+    } else if (host_id) {
+      events = await sql`
         SELECT * FROM live_events
-        WHERE instructor_id = ${instructor_id}
-        ORDER BY scheduled_at DESC
+        WHERE host_id = ${host_id}
+        ORDER BY scheduled_start DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
     } else if (status) {
-      query = sql`
+      events = await sql`
         SELECT * FROM live_events
         WHERE status = ${status}
-        ORDER BY scheduled_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `;
-    } else if (track_id) {
-      query = sql`
-        SELECT * FROM live_events
-        WHERE track_id = ${track_id}
-        ORDER BY scheduled_at DESC
+        ORDER BY scheduled_start DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
     } else {
-      query = sql`
+      events = await sql`
         SELECT * FROM live_events
-        ORDER BY scheduled_at DESC
+        ORDER BY scheduled_start DESC
         LIMIT ${limit} OFFSET ${offset}
       `;
     }
 
-    const events = await query;
     return reply.send({ data: events, pagination: { limit, offset } });
   } catch (error: any) {
     request.log.error(error);
@@ -131,26 +118,23 @@ export async function createLiveEvent(
     const {
       title,
       description,
-      instructor_id,
-      scheduled_at,
-      duration_minutes = 60,
+      host_id,
+      scheduled_start,
+      scheduled_end,
       status = 'scheduled',
-      is_recording = false,
-      max_attendees,
-      meeting_url,
-      track_id,
+      stream_url,
+      max_participants,
     } = request.body;
 
     const result = await sql`
       INSERT INTO live_events (
-        title, description, instructor_id, scheduled_at, duration_minutes,
-        status, is_recording, max_attendees, meeting_url, track_id
+        title, description, host_id, scheduled_start, scheduled_end,
+        status, stream_url, max_participants
       )
       VALUES (
-        ${title}, ${description || null}, ${instructor_id},
-        ${scheduled_at || new Date().toISOString()}, ${duration_minutes},
-        ${status}, ${is_recording}, ${max_attendees || null},
-        ${meeting_url || null}, ${track_id || null}
+        ${title}, ${description || null}, ${host_id},
+        ${scheduled_start}, ${scheduled_end},
+        ${status}, ${stream_url || null}, ${max_participants || null}
       )
       RETURNING *
     `;
@@ -177,12 +161,10 @@ export async function updateLiveEvent(
     if (updates.title !== undefined) updateData.title = updates.title;
     if (updates.description !== undefined) updateData.description = updates.description;
     if (updates.status !== undefined) updateData.status = updates.status;
-    if (updates.is_recording !== undefined) updateData.is_recording = updates.is_recording;
-    if (updates.viewer_count !== undefined) updateData.viewer_count = updates.viewer_count;
-    if (updates.attendee_count !== undefined) updateData.attendee_count = updates.attendee_count;
-    if (updates.recording_url !== undefined) updateData.recording_url = updates.recording_url;
-    if (updates.started_at !== undefined) updateData.started_at = updates.started_at;
-    if (updates.ended_at !== undefined) updateData.ended_at = updates.ended_at;
+    if (updates.stream_url !== undefined) updateData.stream_url = updates.stream_url;
+    if (updates.max_participants !== undefined) updateData.max_participants = updates.max_participants;
+    if (updates.actual_start !== undefined) updateData.actual_start = updates.actual_start;
+    if (updates.actual_end !== undefined) updateData.actual_end = updates.actual_end;
 
     if (Object.keys(updateData).length === 0) {
       return reply.code(400).send({ error: 'Bad Request', message: 'No fields to update' });

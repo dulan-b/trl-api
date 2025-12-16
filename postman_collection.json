@@ -1,13 +1,28 @@
 {
   "info": {
     "name": "The Ready Lab API - Complete",
-    "description": "Complete API collection for The Ready Lab educational platform with Neon PostgreSQL integration",
+    "description": "Complete API collection for The Ready Lab educational platform with Neon PostgreSQL integration.\n\nUpdated: December 15, 2025 - Added include parameter endpoints for complex queries.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "user-uuid-here",
+      "type": "string"
+    },
+    {
+      "key": "postId",
+      "value": "post-uuid-here",
+      "type": "string"
+    },
+    {
+      "key": "communityId",
+      "value": "community-uuid-here",
       "type": "string"
     }
   ],
@@ -40,7 +55,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "user-uuid-here"
+                  "value": "{{userId}}"
                 }
               ]
             },
@@ -64,7 +79,7 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "profile-uuid-here"
+                  "value": "{{userId}}"
                 }
               ]
             },
@@ -83,7 +98,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"bio\": \"Updated bio\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"websiteUrl\": \"https://example.com\"\n}"
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"bio\": \"Updated bio\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"websiteUrl\": \"https://example.com\",\n  \"preferred_language\": \"en\",\n  \"show_content_in_language_first\": true\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/profiles/:id",
@@ -92,11 +107,138 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "profile-uuid-here"
+                  "value": "{{userId}}"
                 }
               ]
             },
-            "description": "Update profile information"
+            "description": "Update profile information including language preferences"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Roles",
+      "item": [
+        {
+          "name": "Get User Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user-roles/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user-roles", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user roles (student/educator/admin)"
+          }
+        },
+        {
+          "name": "Add User Role",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"educator\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user-roles/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user-roles", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Add a role to a user"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Interests",
+      "item": [
+        {
+          "name": "Get User Interests",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user-interests/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user-interests", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user interest tags for personalized feed"
+          }
+        },
+        {
+          "name": "Add Interest",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interest\": \"AI\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user-interests/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user-interests", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Add an interest tag to a user"
+          }
+        },
+        {
+          "name": "Remove Interest",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/user-interests/:userId/:interest",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "user-interests", ":userId", ":interest"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "interest",
+                  "value": "AI"
+                }
+              ]
+            },
+            "description": "Remove an interest tag from a user"
           }
         }
       ]
@@ -201,87 +343,51 @@
       ]
     },
     {
-      "name": "Courses",
-      "item": [
-        {
-          "name": "Get All Courses",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/courses",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "courses"]
-            },
-            "description": "Get all courses"
-          }
-        },
-        {
-          "name": "Create Course with Lessons",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"educatorId\": \"educator-uuid-here\",\n  \"title\": \"Complete Web Development Course\",\n  \"description\": \"Learn HTML, CSS, and JavaScript from scratch\",\n  \"courseType\": \"deep_learning\",\n  \"teachingStyle\": [\"hands-on\", \"project-based\"],\n  \"language\": \"en\",\n  \"price\": 99.99,\n  \"isFree\": false,\n  \"thumbnailUrl\": \"https://example.com/course-thumb.jpg\",\n  \"lessons\": [\n    {\n      \"title\": \"Introduction to HTML\",\n      \"description\": \"Learn HTML basics\",\n      \"lessonType\": \"video\",\n      \"videoAssetId\": \"mux-asset-id-here\",\n      \"orderIndex\": 1,\n      \"duration\": 900,\n      \"isFreePreview\": true\n    },\n    {\n      \"title\": \"HTML Syntax Guide\",\n      \"description\": \"Detailed guide to HTML syntax\",\n      \"lessonType\": \"reading\",\n      \"contentMarkdown\": \"# HTML Syntax\\n\\n## Tags and Elements\\n...\",\n      \"orderIndex\": 2,\n      \"isFreePreview\": false\n    },\n    {\n      \"title\": \"HTML Basics Quiz\",\n      \"description\": \"Test your HTML knowledge\",\n      \"lessonType\": \"quiz\",\n      \"orderIndex\": 3,\n      \"quiz\": {\n        \"passingScore\": 70,\n        \"maxAttempts\": 3,\n        \"questions\": [\n          {\n            \"question\": \"What does HTML stand for?\",\n            \"options\": [\"Hyper Text Markup Language\", \"High Tech Modern Language\", \"Home Tool Markup Language\"],\n            \"correctAnswer\": 0,\n            \"explanation\": \"HTML stands for Hyper Text Markup Language\"\n          }\n        ]\n      }\n    }\n  ]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/courses/with-lessons",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "courses", "with-lessons"]
-            },
-            "description": "Create a course with lessons (videos, text, quizzes) all at once. TODO: Add authentication to ensure only educators can create courses."
-          }
-        },
-        {
-          "name": "Get Course by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/courses/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "courses", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "course-uuid-here"
-                }
-              ]
-            },
-            "description": "Get course details by ID"
-          }
-        }
-      ]
-    },
-    {
       "name": "Lessons",
       "item": [
         {
-          "name": "Create Lesson",
+          "name": "Get Lessons Feed (with includes)",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"moduleId\": \"module-uuid-here\",\n  \"title\": \"Getting Started with HTML\",\n  \"description\": \"Learn the basics of HTML structure and syntax\",\n  \"lessonType\": \"video\",\n  \"videoAssetId\": \"mux-asset-id-here\",\n  \"orderIndex\": 1,\n  \"duration\": 900,\n  \"isFreePreview\": true\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/lessons",
+              "raw": "{{baseUrl}}/api/lessons/feed?user_id={{userId}}&include=module,track,progress&is_standalone=true&limit=20",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "lessons"]
+              "path": ["api", "lessons", "feed"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}",
+                  "description": "Required for progress include"
+                },
+                {
+                  "key": "include",
+                  "value": "module,track,progress",
+                  "description": "Allowed: module, track, progress"
+                },
+                {
+                  "key": "interest_tags",
+                  "value": "AI,Marketing",
+                  "description": "Filter by interest tags (comma-separated)",
+                  "disabled": true
+                },
+                {
+                  "key": "is_standalone",
+                  "value": "true",
+                  "description": "Filter standalone microlearning lessons"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ]
             },
-            "description": "Create a new lesson (moduleId instead of courseId)"
+            "description": "TRANSITIONAL: Get learning feed lessons with optional module/track/progress data via include parameter"
           }
         },
         {
@@ -301,6 +407,28 @@
               ]
             },
             "description": "Get lesson details"
+          }
+        },
+        {
+          "name": "Create Lesson",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleId\": \"module-uuid-here\",\n  \"title\": \"Getting Started with HTML\",\n  \"description\": \"Learn the basics of HTML structure and syntax\",\n  \"lessonType\": \"video\",\n  \"videoAssetId\": \"mux-asset-id-here\",\n  \"orderIndex\": 1,\n  \"duration\": 900,\n  \"isFreePreview\": true,\n  \"isStandalone\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons"]
+            },
+            "description": "Create a new lesson"
           }
         },
         {
@@ -349,35 +477,53 @@
             },
             "description": "Delete a lesson"
           }
-        },
-        {
-          "name": "Get Lesson Progress",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/lessons/:id/progress/:userId",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "lessons", ":id", "progress", ":userId"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "lesson-uuid-here"
-                },
-                {
-                  "key": "userId",
-                  "value": "user-uuid-here"
-                }
-              ]
-            },
-            "description": "Get lesson progress for a specific user"
-          }
         }
       ]
     },
     {
       "name": "Enrollments",
       "item": [
+        {
+          "name": "Get User Enrollments (with includes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/user/:userId?include=track&status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "user", ":userId"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "track",
+                  "description": "Allowed: track"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter by status: active, completed, dropped"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: Get user enrollments with optional track data via include parameter"
+          }
+        },
         {
           "name": "Enroll in Track",
           "request": {
@@ -390,83 +536,64 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"user-uuid-here\",\n  \"trackId\": \"track-uuid-here\"\n}"
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"trackId\": \"track-uuid-here\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/enrollments",
               "host": ["{{baseUrl}}"],
               "path": ["api", "enrollments"]
             },
-            "description": "Enroll a user in a track (userId and trackId instead of studentId and courseId)"
-          }
-        },
-        {
-          "name": "Get User Enrollments",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/enrollments/user/:userId",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "enrollments", "user", ":userId"],
-              "variable": [
-                {
-                  "key": "userId",
-                  "value": "user-uuid-here"
-                }
-              ]
-            },
-            "description": "Get all enrollments for a user (/user/:userId instead of /student/:studentId)"
+            "description": "Enroll a user in a track"
           }
         }
       ]
     },
     {
-      "name": "Quizzes",
+      "name": "Bookmarks",
       "item": [
         {
-          "name": "Create Quiz",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"lessonId\": \"quiz-lesson-uuid-here\",\n  \"passingScore\": 70,\n  \"maxAttempts\": 3,\n  \"questions\": [\n    {\n      \"question\": \"What does HTML stand for?\",\n      \"options\": [\n        \"Hyper Text Markup Language\",\n        \"High Tech Modern Language\",\n        \"Home Tool Markup Language\",\n        \"Hyperlinks and Text Markup Language\"\n      ],\n      \"correctAnswer\": 0,\n      \"explanation\": \"HTML stands for Hyper Text Markup Language\"\n    }\n  ]\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/quizzes",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "quizzes"]
-            },
-            "description": "Create a quiz for a lesson"
-          }
-        },
-        {
-          "name": "Get Quiz by Lesson ID",
+          "name": "Get User Bookmarks (with includes)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/quizzes/lesson/:lessonId",
+              "raw": "{{baseUrl}}/api/bookmarks/user/:userId?include=details&type=lesson",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "quizzes", "lesson", ":lessonId"],
+              "path": ["api", "bookmarks", "user", ":userId"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "details",
+                  "description": "Allowed: details (fetches bookmarked item data)"
+                },
+                {
+                  "key": "type",
+                  "value": "lesson",
+                  "description": "Filter by type: lesson, track, post, product"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ],
               "variable": [
                 {
-                  "key": "lessonId",
-                  "value": "quiz-lesson-uuid-here"
+                  "key": "userId",
+                  "value": "{{userId}}"
                 }
               ]
             },
-            "description": "Get quiz questions for a lesson"
+            "description": "TRANSITIONAL: Get user bookmarks with optional item details via include parameter"
           }
         },
         {
-          "name": "Submit Quiz Answers",
+          "name": "Create Bookmark",
           "request": {
             "method": "POST",
             "header": [
@@ -477,20 +604,940 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"studentId\": \"student-uuid-here\",\n  \"enrollmentId\": \"enrollment-uuid-here\",\n  \"answers\": {\n    \"0\": 0,\n    \"1\": 2\n  }\n}"
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"bookmarkable_type\": \"lesson\",\n  \"bookmarkable_id\": \"lesson-uuid-here\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/quizzes/:quizId/submit",
+              "raw": "{{baseUrl}}/api/bookmarks",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "quizzes", ":quizId", "submit"],
+              "path": ["api", "bookmarks"]
+            },
+            "description": "Create a bookmark (polymorphic: lesson, track, post, product)"
+          }
+        },
+        {
+          "name": "Delete Bookmark by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookmarks", ":id"],
               "variable": [
                 {
-                  "key": "quizId",
-                  "value": "quiz-uuid-here"
+                  "key": "id",
+                  "value": "bookmark-uuid-here"
                 }
               ]
             },
-            "description": "Submit quiz answers and get results"
+            "description": "Delete a bookmark by its ID"
+          }
+        },
+        {
+          "name": "Delete Bookmark by Item",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/user/:userId/:type/:itemId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookmarks", "user", ":userId", ":type", ":itemId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "type",
+                  "value": "lesson"
+                },
+                {
+                  "key": "itemId",
+                  "value": "lesson-uuid-here"
+                }
+              ]
+            },
+            "description": "Delete a bookmark by user, type, and item ID"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Communities",
+      "item": [
+        {
+          "name": "Get All Communities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities"]
+            },
+            "description": "Get all communities"
+          }
+        },
+        {
+          "name": "Get Community by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "Get community details"
+          }
+        },
+        {
+          "name": "Create Community",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Web Development Community\",\n  \"description\": \"A community for web developers\",\n  \"visibility\": \"public\",\n  \"created_by\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/communities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities"]
+            },
+            "description": "Create a new community"
+          }
+        },
+        {
+          "name": "Get Community Members (with includes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members?include=profile&role=member",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", ":communityId", "members"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "profile",
+                  "description": "Allowed: profile"
+                },
+                {
+                  "key": "role",
+                  "value": "member",
+                  "description": "Filter by role: member, moderator, admin"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: Get community members with optional profile data via include parameter"
+          }
+        },
+        {
+          "name": "Join Community",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", ":communityId", "members"],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "Join a community"
+          }
+        },
+        {
+          "name": "Leave Community",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", ":communityId", "members", ":userId"],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Leave a community"
+          }
+        },
+        {
+          "name": "Update Member Role",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"moderator\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", ":communityId", "members", ":userId"],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Update member role (member, moderator, admin)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "List Posts (with includes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?community_id={{communityId}}&include=author,reactions_count&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "community_id",
+                  "value": "{{communityId}}",
+                  "description": "Filter by community"
+                },
+                {
+                  "key": "include",
+                  "value": "author,reactions_count",
+                  "description": "Allowed: author, reactions_count"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: List posts with optional author/reactions data via include parameter"
+          }
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Get post details"
+          }
+        },
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community_id\": \"{{communityId}}\",\n  \"author_id\": \"{{userId}}\",\n  \"content\": \"This is my post content\",\n  \"title\": \"Optional Title\",\n  \"post_type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"]
+            },
+            "description": "Create a new post"
+          }
+        },
+        {
+          "name": "Update Post",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated content\",\n  \"is_pinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Update post content"
+          }
+        },
+        {
+          "name": "Delete Post",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Soft delete a post"
+          }
+        },
+        {
+          "name": "Get Post Comments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "comments"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Get comments for a post"
+          }
+        },
+        {
+          "name": "Create Comment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"content\": \"This is my comment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/comments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "comments"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Add a comment to a post"
+          }
+        },
+        {
+          "name": "Get Post Reactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "reactions"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Get reaction counts for a post"
+          }
+        },
+        {
+          "name": "Get User's Reaction",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions/user/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "reactions", "user", ":userId"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get current user's reaction on a post (returns hasReacted, emoji, reactedAt)"
+          }
+        },
+        {
+          "name": "Add Reaction",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"reaction_type\": \"👍\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "reactions"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Add or update reaction on a post"
+          }
+        },
+        {
+          "name": "Remove Reaction",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "reactions", ":userId"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Remove reaction from a post"
+          }
+        },
+        {
+          "name": "Report Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporter_id\": \"{{userId}}\",\n  \"reason\": \"spam\",\n  \"description\": \"This post is spam\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/report",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", ":id", "report"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Report a post"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Live Events",
+      "item": [
+        {
+          "name": "Get All Live Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events?status=upcoming",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "live-events"],
+              "query": [
+                {
+                  "key": "host_id",
+                  "value": "{{userId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "upcoming"
+                }
+              ]
+            },
+            "description": "Get all live events"
+          }
+        },
+        {
+          "name": "Get Live Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "live-events", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Get live event details"
+          }
+        },
+        {
+          "name": "Create Live Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"host_id\": \"{{userId}}\",\n  \"title\": \"Live Q&A Session\",\n  \"description\": \"Join me for a live Q&A\",\n  \"scheduled_start\": \"2025-12-20T18:00:00Z\",\n  \"scheduled_end\": \"2025-12-20T19:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "live-events"]
+            },
+            "description": "Create a new live event"
+          }
+        },
+        {
+          "name": "Get Stream Credentials",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "live-events", ":id", "credentials"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Get stream credentials (host only)"
+          }
+        },
+        {
+          "name": "Get Chat History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "live-events", ":id", "chat"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Get chat message history"
+          }
+        },
+        {
+          "name": "Send Chat Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"message\": \"Hello everyone!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "live-events", ":id", "chat"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Send a chat message"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get Subscription Plans",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/plans",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "plans"]
+            },
+            "description": "Get all active subscription plans"
+          }
+        },
+        {
+          "name": "Get User Subscription",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/user/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "user", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's active subscription"
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"plan_id\": \"plan-uuid-here\",\n  \"stripe_subscription_id\": \"sub_xxx\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions"]
+            },
+            "description": "Create a new subscription"
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/:id/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", ":id", "cancel"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subscription-uuid-here"
+                }
+              ]
+            },
+            "description": "Cancel a subscription"
+          }
+        },
+        {
+          "name": "Get User Invoices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/user/:userId/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "subscriptions", "user", ":userId", "invoices"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's invoice history"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stripe Connect",
+      "item": [
+        {
+          "name": "Get Connect Account Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stripe-connect/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "stripe-connect", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get educator's Stripe Connect account status"
+          }
+        },
+        {
+          "name": "Create Connect Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"stripe_account_id\": \"acct_xxx\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/stripe-connect",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "stripe-connect"]
+            },
+            "description": "Create a Stripe Connect account record"
+          }
+        },
+        {
+          "name": "Get Payouts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/stripe-connect/:userId/payouts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "stripe-connect", ":userId", "payouts"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get educator's payout history"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Admin Roles",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/roles/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "roles", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's admin roles"
+          }
+        },
+        {
+          "name": "Get Feature Flags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/feature-flags",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "feature-flags"]
+            },
+            "description": "Get all feature flags"
+          }
+        },
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/audit-logs?limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "audit-logs"],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "action",
+                  "value": "user.login",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get audit logs with optional filtering"
+          }
+        },
+        {
+          "name": "Get Educator Agreements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/educator-agreements/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "educator-agreements", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's educator agreement status"
+          }
+        },
+        {
+          "name": "Get Verified Badge Status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/verified-badges/:userId",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "verified-badges", ":userId"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get educator's verified badge status"
           }
         }
       ]
@@ -510,7 +1557,7 @@
               "variable": [
                 {
                   "key": "userId",
-                  "value": "user-uuid-here"
+                  "value": "{{userId}}"
                 }
               ]
             },
@@ -535,28 +1582,6 @@
             },
             "description": "Mark a notification as read"
           }
-        },
-        {
-          "name": "Create Notification",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"user-uuid-here\",\n  \"type\": \"course_update\",\n  \"title\": \"New Lesson Available\",\n  \"message\": \"A new lesson has been added to your course\",\n  \"metadata\": {\n    \"courseId\": \"course-uuid-here\",\n    \"lessonId\": \"lesson-uuid-here\"\n  }\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/notifications",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "notifications"]
-            },
-            "description": "Create a new notification (uses metadata instead of actionUrl)"
-          }
         }
       ]
     },
@@ -575,7 +1600,7 @@
               "variable": [
                 {
                   "key": "userId",
-                  "value": "user-uuid-here"
+                  "value": "{{userId}}"
                 }
               ]
             },
@@ -598,110 +1623,7 @@
                 }
               ]
             },
-            "description": "Get certification details including verificationCode"
-          }
-        },
-        {
-          "name": "Create Certification",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"userId\": \"user-uuid-here\",\n  \"trackId\": \"track-uuid-here\",\n  \"certificateUrl\": \"https://example.com/cert.pdf\",\n  \"expiresAt\": \"2025-12-31T23:59:59Z\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/certifications",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "certifications"]
-            },
-            "description": "Create a new certification (auto-generates verificationCode)"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Communities",
-      "item": [
-        {
-          "name": "Get All Communities",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/communities",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "communities"]
-            },
-            "description": "Get all communities"
-          }
-        },
-        {
-          "name": "Create Community",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Web Development Community\",\n  \"description\": \"A community for web developers to share knowledge and help each other\",\n  \"type\": \"public\",\n  \"trackId\": \"track-uuid-here\",\n  \"createdBy\": \"user-uuid-here\",\n  \"thumbnailUrl\": \"https://example.com/community-thumb.jpg\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/communities",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "communities"]
-            },
-            "description": "Create a new community (type defaults to 'public', trackId is optional)"
-          }
-        },
-        {
-          "name": "Get Community Posts",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/communities/:id/posts",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "communities", ":id", "posts"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "community-uuid-here"
-                }
-              ]
-            },
-            "description": "Get all posts for a community"
-          }
-        },
-        {
-          "name": "Create Post",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"communityId\": \"community-uuid-here\",\n  \"authorId\": \"user-uuid-here\",\n  \"title\": \"Welcome to the community!\",\n  \"content\": \"This is my first post in this community.\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/communities/posts",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "communities", "posts"]
-            },
-            "description": "Create a new post in a community"
+            "description": "Get certification details"
           }
         }
       ]
@@ -740,141 +1662,116 @@
             },
             "description": "Get product details"
           }
-        },
-        {
-          "name": "Create Product",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"creatorId\": \"user-uuid-here\",\n  \"title\": \"My Digital Product\",\n  \"description\": \"A helpful digital resource\",\n  \"price\": 29.99,\n  \"fileUrl\": \"https://example.com/file.pdf\",\n  \"thumbnailUrl\": \"https://example.com/thumb.jpg\",\n  \"category\": \"ebook\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/products",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "products"]
-            },
-            "description": "Create a new digital product (uses fileUrl and thumbnailUrl, includes creatorId)"
-          }
         }
       ]
     },
     {
-      "name": "Videos",
+      "name": "Purchases",
       "item": [
         {
-          "name": "Create Upload URL",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"My Video Title\",\n  \"description\": \"Video description\",\n  \"userId\": \"user-uuid-here\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/videos/upload",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "videos", "upload"]
-            },
-            "description": "Create a Mux upload URL for direct video upload"
-          }
-        },
-        {
-          "name": "Get Video by ID",
+          "name": "Get User Purchases",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/videos/:id",
+              "raw": "{{baseUrl}}/api/purchases/user/:userId",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "videos", ":id"],
+              "path": ["api", "purchases", "user", ":userId"],
               "variable": [
                 {
-                  "key": "id",
-                  "value": "video-uuid-here"
+                  "key": "userId",
+                  "value": "{{userId}}"
                 }
               ]
             },
-            "description": "Get video asset details including playback info"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Live Streams",
-      "item": [
-        {
-          "name": "Get All Live Streams",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/live",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "live"]
-            },
-            "description": "Get all live streams"
+            "description": "Get user's purchase history"
           }
         },
         {
-          "name": "Get Live Stream by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/live/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "live", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": "stream-uuid-here"
-                }
-              ]
-            },
-            "description": "Get live stream details"
-          }
-        }
-      ]
-    },
-    {
-      "name": "Webhooks",
-      "item": [
-        {
-          "name": "Mux Webhook",
+          "name": "Create Purchase",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "Mux-Signature",
-                "value": "signature-here"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"video.asset.ready\",\n  \"data\": {}\n}"
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"product_id\": \"product-uuid-here\",\n  \"amount\": 29.99,\n  \"stripe_payment_intent_id\": \"pi_xxx\"\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/webhooks/mux",
+              "raw": "{{baseUrl}}/api/purchases",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "webhooks", "mux"]
+              "path": ["api", "purchases"]
             },
-            "description": "Mux webhook handler for video events"
+            "description": "Create a purchase record"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Institutions",
+      "item": [
+        {
+          "name": "Get Institution by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "institutions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "institution-uuid-here"
+                }
+              ]
+            },
+            "description": "Get institution details"
+          }
+        },
+        {
+          "name": "Create Institution",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example University\",\n  \"type\": \"university\",\n  \"admin_id\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "institutions"]
+            },
+            "description": "Create a new institution"
+          }
+        },
+        {
+          "name": "Get Institution Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions/:id/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "institutions", ":id", "members"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "institution-uuid-here"
+                }
+              ]
+            },
+            "description": "Get members of an institution"
           }
         }
       ]

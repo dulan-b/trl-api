@@ -24,42 +24,80 @@ interface UpdateMemberRoleBody {
 }
 
 /**
- * List community members
+ * List community members with optional profile data
+ *
+ * TRANSITIONAL IMPLEMENTATION: This uses an `include` query parameter to optionally
+ * join related tables. While functional and secure (whitelisted includes only),
+ * this exposes internal table structure to the client.
+ *
+ * TODO: Replace with purpose-built endpoints or a GraphQL-style approach
+ * that abstracts internal schema details from the API contract.
+ *
+ * Allowed includes: profile
  */
+const MEMBER_ALLOWED_INCLUDES = ['profile'] as const;
+type MemberInclude = typeof MEMBER_ALLOWED_INCLUDES[number];
+
 export async function listCommunityMembers(
   request: FastifyRequest<{
     Params: CommunityParams;
-    Querystring: { limit?: number; offset?: number; role?: string };
+    Querystring: { limit?: string; offset?: string; role?: string; include?: string };
   }>,
   reply: FastifyReply
 ) {
   try {
     const { communityId } = request.params;
-    const { limit = 50, offset = 0, role } = request.query;
+    const { limit = '50', offset = '0', role, include } = request.query;
+    const limitNum = parseInt(limit);
+    const offsetNum = parseInt(offset);
 
-    let query;
-    if (role) {
-      query = sql`
-        SELECT cm.*, p.full_name, p.avatar_url, p.email
-        FROM community_members cm
-        LEFT JOIN profiles p ON cm.user_id = p.id
-        WHERE cm.community_id = ${communityId} AND cm.role = ${role}
-        ORDER BY cm.joined_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `;
-    } else {
-      query = sql`
-        SELECT cm.*, p.full_name, p.avatar_url, p.email
+    // Parse and whitelist includes - SECURITY: only allow predefined values
+    const requestedIncludes = (include?.split(',') || [])
+      .filter((i): i is MemberInclude => MEMBER_ALLOWED_INCLUDES.includes(i as MemberInclude));
+
+    const includeProfile = requestedIncludes.includes('profile');
+
+    let members;
+
+    if (includeProfile) {
+      members = await sql`
+        SELECT
+          cm.*,
+          json_build_object(
+            'id', p.id,
+            'full_name', p.full_name,
+            'avatar_url', p.avatar_url,
+            'email', p.email
+          ) as profile
         FROM community_members cm
         LEFT JOIN profiles p ON cm.user_id = p.id
         WHERE cm.community_id = ${communityId}
+        ${role ? sql`AND cm.role = ${role}` : sql``}
         ORDER BY cm.joined_at DESC
-        LIMIT ${limit} OFFSET ${offset}
+        LIMIT ${limitNum} OFFSET ${offsetNum}
+      `;
+    } else {
+      members = await sql`
+        SELECT cm.*
+        FROM community_members cm
+        WHERE cm.community_id = ${communityId}
+        ${role ? sql`AND cm.role = ${role}` : sql``}
+        ORDER BY cm.joined_at DESC
+        LIMIT ${limitNum} OFFSET ${offsetNum}
       `;
     }
 
-    const members = await query;
-    return reply.send({ data: members, pagination: { limit, offset } });
+    return reply.send({
+      data: members.map(member => ({
+        id: member.id,
+        communityId: member.community_id,
+        userId: member.user_id,
+        role: member.role,
+        joinedAt: member.joined_at,
+        ...(includeProfile && member.profile ? { profile: member.profile } : {}),
+      })),
+      pagination: { limit: limitNum, offset: offsetNum },
+    });
   } catch (error: any) {
     request.log.error(error);
     return reply.code(500).send({ error: 'Internal Server Error', message: error.message });

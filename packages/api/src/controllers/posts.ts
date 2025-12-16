@@ -11,20 +11,95 @@ interface PostParams {
 
 interface CreatePostBody {
   community_id: string;
-  author_id: string;
+  user_id: string;
+  title: string;
   content: string;
-  post_type?: 'text' | 'media' | 'link';
   media_url?: string;
-  media_duration_seconds?: number;
-  link_url?: string;
-  link_title?: string;
-  link_description?: string;
-  link_image?: string;
 }
 
 interface UpdatePostBody {
+  title?: string;
   content?: string;
-  is_pinned?: boolean;
+  media_url?: string;
+}
+
+/**
+ * List posts with optional related data
+ *
+ * Allowed includes: author
+ */
+const POST_ALLOWED_INCLUDES = ['author'] as const;
+type PostInclude = typeof POST_ALLOWED_INCLUDES[number];
+
+export async function listPosts(
+  request: FastifyRequest<{
+    Querystring: {
+      community_id?: string;
+      include?: string;
+      limit?: string;
+      offset?: string;
+    };
+  }>,
+  reply: FastifyReply
+) {
+  try {
+    const { community_id, include, limit = '20', offset = '0' } = request.query;
+    const limitNum = parseInt(limit);
+    const offsetNum = parseInt(offset);
+
+    // Parse and whitelist includes
+    const requestedIncludes = (include?.split(',') || [])
+      .filter((i): i is PostInclude => POST_ALLOWED_INCLUDES.includes(i as PostInclude));
+
+    const includeAuthor = requestedIncludes.includes('author');
+
+    let posts;
+
+    if (includeAuthor) {
+      posts = await sql`
+        SELECT
+          p.*,
+          json_build_object(
+            'id', pr.id,
+            'full_name', pr.full_name,
+            'avatar_url', pr.avatar_url
+          ) as author
+        FROM posts p
+        LEFT JOIN profiles pr ON p.user_id = pr.id
+        ${community_id ? sql`WHERE p.community_id = ${community_id}` : sql``}
+        ORDER BY p.created_at DESC
+        LIMIT ${limitNum} OFFSET ${offsetNum}
+      `;
+    } else {
+      posts = await sql`
+        SELECT p.*
+        FROM posts p
+        ${community_id ? sql`WHERE p.community_id = ${community_id}` : sql``}
+        ORDER BY p.created_at DESC
+        LIMIT ${limitNum} OFFSET ${offsetNum}
+      `;
+    }
+
+    return reply.send({
+      data: posts.map(post => ({
+        id: post.id,
+        communityId: post.community_id,
+        userId: post.user_id,
+        title: post.title,
+        content: post.content,
+        mediaUrl: post.media_url,
+        likesCount: post.likes_count,
+        commentsCount: post.comments_count,
+        createdAt: post.created_at,
+        updatedAt: post.updated_at,
+        ...(includeAuthor && post.author ? { author: post.author } : {}),
+      })),
+      pagination: { limit: limitNum, offset: offsetNum },
+    });
+  } catch (error: any) {
+    request.log.error(error);
+    return reply.code(500).send({ error: 'Internal Server Error', message: error.message });
+  }
 }
 
 /**
@@ -40,8 +115,8 @@ export async function getPostById(
     const result = await sql`
       SELECT p.*, pr.full_name as author_name, pr.avatar_url as author_avatar
       FROM posts p
-      LEFT JOIN profiles pr ON p.author_id = pr.id
-      WHERE p.id = ${id} AND p.deleted_at IS NULL
+      LEFT JOIN profiles pr ON p.user_id = pr.id
+      WHERE p.id = ${id}
     `;
 
     if (result.length === 0) {
@@ -63,31 +138,11 @@ export async function createPost(
   reply: FastifyReply
 ) {
   try {
-    const {
-      community_id,
-      author_id,
-      content,
-      post_type = 'text',
-      media_url,
-      media_duration_seconds,
-      link_url,
-      link_title,
-      link_description,
-      link_image,
-    } = request.body;
+    const { community_id, user_id, title, content, media_url } = request.body;
 
     const result = await sql`
-      INSERT INTO posts (
-        community_id, author_id, content, post_type,
-        media_url, media_duration_seconds,
-        link_url, link_title, link_description, link_image
-      )
-      VALUES (
-        ${community_id}, ${author_id}, ${content}, ${post_type},
-        ${media_url || null}, ${media_duration_seconds || null},
-        ${link_url || null}, ${link_title || null},
-        ${link_description || null}, ${link_image || null}
-      )
+      INSERT INTO posts (community_id, user_id, title, content, media_url)
+      VALUES (${community_id}, ${user_id}, ${title}, ${content}, ${media_url || null})
       RETURNING *
     `;
 
@@ -110,8 +165,9 @@ export async function updatePost(
     const updates = request.body;
 
     const updateData: Record<string, any> = {};
+    if (updates.title !== undefined) updateData.title = updates.title;
     if (updates.content !== undefined) updateData.content = updates.content;
-    if (updates.is_pinned !== undefined) updateData.is_pinned = updates.is_pinned;
+    if (updates.media_url !== undefined) updateData.media_url = updates.media_url;
 
     if (Object.keys(updateData).length === 0) {
       return reply.code(400).send({ error: 'Bad Request', message: 'No fields to update' });
@@ -120,7 +176,7 @@ export async function updatePost(
     const result = await sql`
       UPDATE posts
       SET ${sql(updateData)}, updated_at = NOW()
-      WHERE id = ${id} AND deleted_at IS NULL
+      WHERE id = ${id}
       RETURNING *
     `;
 
@@ -136,7 +192,7 @@ export async function updatePost(
 }
 
 /**
- * Delete post (soft delete)
+ * Delete post
  */
 export async function deletePost(
   request: FastifyRequest<{ Params: PostParams }>,
@@ -146,10 +202,7 @@ export async function deletePost(
     const { id } = request.params;
 
     const result = await sql`
-      UPDATE posts
-      SET deleted_at = NOW()
-      WHERE id = ${id} AND deleted_at IS NULL
-      RETURNING id
+      DELETE FROM posts WHERE id = ${id} RETURNING id
     `;
 
     if (result.length === 0) {
@@ -270,6 +323,36 @@ export async function getPostReactions(
     `;
 
     return reply.send({ data: reactions });
+  } catch (error: any) {
+    request.log.error(error);
+    return reply.code(500).send({ error: 'Internal Server Error', message: error.message });
+  }
+}
+
+/**
+ * Get current user's reaction on a post
+ * Returns the user's reaction if they have one, or null if not
+ */
+export async function getUserReaction(
+  request: FastifyRequest<{
+    Params: { id: string; userId: string };
+  }>,
+  reply: FastifyReply
+) {
+  try {
+    const { id, userId } = request.params;
+
+    const [reaction] = await sql`
+      SELECT reaction_type as emoji, created_at
+      FROM post_reactions
+      WHERE post_id = ${id} AND user_id = ${userId}
+    `;
+
+    return reply.send({
+      hasReacted: !!reaction,
+      emoji: reaction?.emoji || null,
+      reactedAt: reaction?.created_at || null,
+    });
   } catch (error: any) {
     request.log.error(error);
     return reply.code(500).send({ error: 'Internal Server Error', message: error.message });

@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import {
+  listPosts,
   getPostById,
   createPost,
   updatePost,
@@ -8,6 +9,7 @@ import {
   createPostComment,
   deletePostComment,
   getPostReactions,
+  getUserReaction,
   addPostReaction,
   removePostReaction,
   bookmarkPost,
@@ -19,6 +21,10 @@ import {
 import { optionalAuth } from '../middleware/auth.js';
 
 export async function postRoutes(fastify: FastifyInstance) {
+  // List posts with optional includes (author, reactions_count)
+  // TRANSITIONAL: Uses include param, see controller for TODO notes
+  fastify.get('/', { onRequest: [optionalAuth], handler: listPosts });
+
   // Get post by ID
   fastify.get('/:id', { onRequest: [optionalAuth], handler: getPostById });
 
@@ -38,6 +44,8 @@ export async function postRoutes(fastify: FastifyInstance) {
 
   // Reactions
   fastify.get('/:id/reactions', { onRequest: [optionalAuth], handler: getPostReactions });
+  // Get current user's reaction on a post
+  fastify.get('/:id/reactions/user/:userId', { onRequest: [optionalAuth], handler: getUserReaction });
   fastify.post('/:id/reactions', { onRequest: [optionalAuth], handler: addPostReaction });
   fastify.delete('/:id/reactions/:userId', { onRequest: [optionalAuth], handler: removePostReaction });
 
