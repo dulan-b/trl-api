@@ -44,10 +44,10 @@ export async function listMicroLessons(
       category?: string;
       level?: string;
       interest_tags?: string;
-      is_active?: boolean;
+      is_active?: string;
       include?: string;
-      limit?: number;
-      offset?: number;
+      limit?: string;
+      offset?: string;
     };
   }>,
   reply: FastifyReply
@@ -58,72 +58,97 @@ export async function listMicroLessons(
       category,
       level,
       interest_tags,
-      is_active = true,
-      include,
-      limit = 50,
-      offset = 0
+      is_active,
+      include
     } = request.query;
 
-    // Build conditions dynamically
-    const conditions: string[] = ['ml.is_active = true'];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    if (instructor_id) {
-      conditions.push(`ml.instructor_id = $${paramIndex++}`);
-      values.push(instructor_id);
-    }
-
-    if (category) {
-      conditions.push(`ml.category = $${paramIndex++}`);
-      values.push(category);
-    }
-
-    if (level) {
-      conditions.push(`ml.level = $${paramIndex++}`);
-      values.push(level);
-    }
-
-    if (is_active !== undefined) {
-      conditions[0] = `ml.is_active = $${paramIndex++}`;
-      values.push(is_active);
-    }
-
-    // Handle interest_tags filter (check if any tag matches)
-    if (interest_tags) {
-      const tags = interest_tags.split(',').map(t => t.trim());
-      conditions.push(`ml.interest_tags ?| $${paramIndex++}`);
-      values.push(tags);
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    // Check if we need to include instructor info
+    const limit = parseInt(request.query.limit || '50', 10);
+    const offset = parseInt(request.query.offset || '0', 10);
     const includeInstructor = include?.includes('instructor');
 
+    // Simple query building based on filters
     let microLessons;
+
     if (includeInstructor) {
-      microLessons = await sql`
-        SELECT
-          ml.*,
-          json_build_object(
-            'id', p.id,
-            'full_name', p.full_name,
-            'avatar_url', p.avatar_url
-          ) as instructor
-        FROM micro_lessons ml
-        LEFT JOIN profiles p ON ml.instructor_id = p.id
-        ${sql.unsafe(whereClause)}
-        ORDER BY ml.created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `;
+      if (instructor_id && category && level) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.instructor_id = ${instructor_id} AND ml.category = ${category} AND ml.level = ${level}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (instructor_id && category) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.instructor_id = ${instructor_id} AND ml.category = ${category}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (instructor_id && level) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.instructor_id = ${instructor_id} AND ml.level = ${level}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (category && level) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.category = ${category} AND ml.level = ${level}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (instructor_id) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.instructor_id = ${instructor_id}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (category) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.category = ${category}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (level) {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true AND ml.level = ${level}
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else {
+        microLessons = await sql`
+          SELECT ml.*, json_build_object('id', p.id, 'full_name', p.full_name, 'avatar_url', p.avatar_url) as instructor
+          FROM micro_lessons ml LEFT JOIN profiles p ON ml.instructor_id = p.id
+          WHERE ml.is_active = true
+          ORDER BY ml.created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      }
     } else {
-      microLessons = await sql`
-        SELECT * FROM micro_lessons ml
-        ${sql.unsafe(whereClause)}
-        ORDER BY created_at DESC
-        LIMIT ${limit} OFFSET ${offset}
-      `;
+      if (category && level) {
+        microLessons = await sql`
+          SELECT * FROM micro_lessons WHERE is_active = true AND category = ${category} AND level = ${level}
+          ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (category) {
+        microLessons = await sql`
+          SELECT * FROM micro_lessons WHERE is_active = true AND category = ${category}
+          ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else if (level) {
+        microLessons = await sql`
+          SELECT * FROM micro_lessons WHERE is_active = true AND level = ${level}
+          ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      } else {
+        microLessons = await sql`
+          SELECT * FROM micro_lessons WHERE is_active = true
+          ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}
+        `;
+      }
     }
 
     return reply.send({ data: microLessons, pagination: { limit, offset } });
