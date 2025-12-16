@@ -29,6 +29,7 @@ import { stripeConnectRoutes } from './routes/stripeConnect.js';
 import { institutionRoutes } from './routes/institutions.js';
 import { adminRoutes } from './routes/admin.js';
 import { bookmarkRoutes } from './routes/bookmarks.js';
+import { microLessonRoutes } from './routes/microLessons.js';
 
 const config = getEnvConfig();
 
@@ -118,6 +119,7 @@ await fastify.register(stripeConnectRoutes, { prefix: '/api/stripe-connect' });
 await fastify.register(institutionRoutes, { prefix: '/api/institutions' });
 await fastify.register(adminRoutes, { prefix: '/api/admin' });
 await fastify.register(bookmarkRoutes, { prefix: '/api/bookmarks' });
+await fastify.register(microLessonRoutes, { prefix: '/api/micro-lessons' });
 
 // 404 handler
 fastify.setNotFoundHandler((request, reply) => {
