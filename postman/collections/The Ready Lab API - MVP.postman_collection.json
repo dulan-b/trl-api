@@ -1,0 +1,2652 @@
+{
+  "info": {
+    "_postman_id": "805ab4e8-8ac7-4472-8fd8-638d3a48efb1",
+    "name": "The Ready Lab API - MVP",
+    "description": "Complete API collection for The Ready Lab educational platform with Neon PostgreSQL integration.\n\nUpdated: December 15, 2025 - Added include parameter endpoints for complex queries.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🧪 Test Data (Seeded)",
+      "item": [
+        {
+          "name": "Health Check",
+          "id": "51a92e3b-a64a-41d8-a5e0-e87a913f49a4",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Test Student Profile",
+          "id": "a73ff9aa-0626-4a02-86a5-d925b702bcb5",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/11111111-1111-1111-1111-111111111111",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles",
+                "11111111-1111-1111-1111-111111111111"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Test Educator Profile",
+          "id": "a689002c-db5d-4296-be0d-7387237388ee",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/22222222-2222-2222-2222-222222222222",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles",
+                "22222222-2222-2222-2222-222222222222"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Tracks",
+          "id": "afbf4572-4eb2-4a0b-918a-2343e85c9f4d",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tracks"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Psychology Track",
+          "id": "12cbf659-11bd-43ed-986e-b5e157e5bb12",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks/aaaa1111-1111-1111-1111-111111111111",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tracks",
+                "aaaa1111-1111-1111-1111-111111111111"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Track Modules",
+          "id": "fc6f2b1f-5589-4120-a104-41074d93e34d",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks/aaaa1111-1111-1111-1111-111111111111/modules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tracks",
+                "aaaa1111-1111-1111-1111-111111111111",
+                "modules"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Module Lessons",
+          "id": "737cd7f0-e3a3-4283-b29f-079b62a2698c",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/bbbb1111-1111-1111-1111-111111111111/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules",
+                "bbbb1111-1111-1111-1111-111111111111",
+                "lessons"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson by ID",
+          "id": "d5a3e815-732d-4bcd-8861-ea284f34edf7",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/cccc1111-1111-1111-1111-111111111111",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lessons",
+                "cccc1111-1111-1111-1111-111111111111"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Student Enrollments (with track)",
+          "id": "d29b23e2-6c9b-4472-82d9-e1bb6d6bd7d5",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/user/11111111-1111-1111-1111-111111111111?include=track",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "enrollments",
+                "user",
+                "11111111-1111-1111-1111-111111111111"
+              ],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "track"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Communities",
+          "id": "208faf7d-c5dd-4976-aefb-574e300728a0",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Psychology Community",
+          "id": "1e9268c8-6010-4ac5-8207-08e65ce448f3",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/eeee1111-1111-1111-1111-111111111111",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                "eeee1111-1111-1111-1111-111111111111"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Community Members (with profile)",
+          "id": "6820d8de-cbfd-4429-8e6e-1f330f536aa8",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/eeee1111-1111-1111-1111-111111111111/members?include=profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                "eeee1111-1111-1111-1111-111111111111",
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "profile"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Posts (with author)",
+          "id": "107201f8-a53f-478d-a59b-4568bb93c8b7",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?community_id=eeee1111-1111-1111-1111-111111111111&include=author",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "community_id",
+                  "value": "eeee1111-1111-1111-1111-111111111111"
+                },
+                {
+                  "key": "include",
+                  "value": "author"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Post by ID",
+          "id": "60f711ee-2d31-44fc-b5de-9e0d59b28a97",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1111aaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                "1111aaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookmarks (with details)",
+          "id": "59136005-d5fa-4ae5-816d-d2cd6b679df0",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/user/11111111-1111-1111-1111-111111111111?include=details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookmarks",
+                "user",
+                "11111111-1111-1111-1111-111111111111"
+              ],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "details"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Post (Test)",
+          "id": "a5aab523-7ae8-4d6a-ab5b-97f09e50f355",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community_id\": \"eeee1111-1111-1111-1111-111111111111\",\n  \"user_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"title\": \"Test Post from Postman\",\n  \"content\": \"This is a test post created via API\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Bookmark (Test)",
+          "id": "effa1be6-989a-43a9-bcc9-4a25c78786b6",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"bookmarkable_type\": \"lesson\",\n  \"bookmarkable_id\": \"cccc2222-2222-2222-2222-222222222222\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookmarks"
+              ]
+            }
+          }
+        }
+      ],
+      "id": "7d0c7543-1e8c-4ce1-8e80-738d49ee89a1",
+      "description": "Pre-configured requests using seeded test data. Run seed-test-data.sql first."
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get User by ID",
+          "id": "c5d729f8-c939-4ac0-81ac-0605484232e6",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user profile by ID"
+          }
+        }
+      ],
+      "id": "d746e4fc-00aa-46d1-844d-147772a74e48"
+    },
+    {
+      "name": "Profiles",
+      "item": [
+        {
+          "name": "Get Profile by ID",
+          "id": "8ac27204-2c98-483b-961b-507468cb371a",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get profile details by ID"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "id": "36f3cf7d-0a74-4ff7-8718-fa4404ad103f",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Updated Name\",\n  \"bio\": \"Updated bio\",\n  \"avatarUrl\": \"https://example.com/avatar.jpg\",\n  \"websiteUrl\": \"https://example.com\",\n  \"preferred_language\": \"en\",\n  \"show_content_in_language_first\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profiles",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Update profile information including language preferences"
+          }
+        }
+      ],
+      "id": "0237ea7a-1a8d-4309-8a3e-eb3b364f36cd"
+    },
+    {
+      "name": "User Roles",
+      "item": [
+        {
+          "name": "Get User Roles",
+          "id": "6730a755-5ed3-4f44-998d-c172cb78c208",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/user-roles/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user-roles",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user roles (student/educator/admin)"
+          }
+        },
+        {
+          "name": "Add User Role",
+          "id": "db0853b2-2775-4c4f-9bad-ad1b7a376208",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"educator\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user-roles/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user-roles",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Add a role to a user"
+          }
+        }
+      ],
+      "id": "0eb87e85-d840-4377-b415-52997c09d4ee"
+    },
+    {
+      "name": "User Interests",
+      "item": [
+        {
+          "name": "Get User Interests",
+          "id": "13aa1708-35e3-4023-8db7-c3c2d25bb6be",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/user-interests/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user-interests",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user interest tags for personalized feed"
+          }
+        },
+        {
+          "name": "Add Interest",
+          "id": "8766693c-bb3f-4fa5-9e02-4c082ac1d4ac",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interest\": \"AI\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/user-interests/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user-interests",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Add an interest tag to a user"
+          }
+        },
+        {
+          "name": "Remove Interest",
+          "id": "3028dbcb-8165-4410-b0b8-14bd7d074620",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/user-interests/:userId/:interest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "user-interests",
+                ":userId",
+                ":interest"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "interest",
+                  "value": "AI"
+                }
+              ]
+            },
+            "description": "Remove an interest tag from a user"
+          }
+        }
+      ],
+      "id": "fd9fe448-d846-456a-b8ad-2184b4f2c9e8"
+    },
+    {
+      "name": "Tracks",
+      "item": [
+        {
+          "name": "Get All Tracks",
+          "id": "6466d270-f9e4-4dc2-a0b2-923bae8aa92d",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tracks"
+              ]
+            },
+            "description": "Get all learning tracks"
+          }
+        },
+        {
+          "name": "Get Track by ID",
+          "id": "511e1cb3-6bff-49f6-ac63-49b6c16262a7",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tracks",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "track-uuid-here"
+                }
+              ]
+            },
+            "description": "Get track details by ID"
+          }
+        },
+        {
+          "name": "Get Modules for Track",
+          "id": "3bec7c14-8ccd-40a3-9134-4c0308189fdd",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks/:id/modules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tracks",
+                ":id",
+                "modules"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "track-uuid-here"
+                }
+              ]
+            },
+            "description": "Get all modules for a specific track"
+          }
+        }
+      ],
+      "id": "6b6d46d6-89d6-4a09-b801-9d4231ce21f3"
+    },
+    {
+      "name": "Modules",
+      "item": [
+        {
+          "name": "Get Module by ID",
+          "id": "5febef91-5498-444d-bc8c-fbcbec0566ae",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "module-uuid-here"
+                }
+              ]
+            },
+            "description": "Get module details by ID"
+          }
+        },
+        {
+          "name": "Get Lessons for Module",
+          "id": "8784d733-2dad-4cd8-97fb-a758db0ab6be",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/:id/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "modules",
+                ":id",
+                "lessons"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "module-uuid-here"
+                }
+              ]
+            },
+            "description": "Get all lessons for a specific module"
+          }
+        }
+      ],
+      "id": "28799d74-1301-4f60-89a3-ad3e1572e5c8"
+    },
+    {
+      "name": "Lessons",
+      "item": [
+        {
+          "name": "Get Lessons Feed (with includes)",
+          "id": "8d85fa92-3b26-411c-89ae-869d697ab0fd",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/feed?user_id={{userId}}&include=module,track,progress&is_standalone=true&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lessons",
+                "feed"
+              ],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}",
+                  "description": "Required for progress include"
+                },
+                {
+                  "key": "include",
+                  "value": "module,track,progress",
+                  "description": "Allowed: module, track, progress"
+                },
+                {
+                  "key": "interest_tags",
+                  "value": "AI,Marketing",
+                  "description": "Filter by interest tags (comma-separated)",
+                  "disabled": true
+                },
+                {
+                  "key": "is_standalone",
+                  "value": "true",
+                  "description": "Filter standalone microlearning lessons"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: Get learning feed lessons with optional module/track/progress data via include parameter"
+          }
+        },
+        {
+          "name": "Get Lesson by ID",
+          "id": "fc3230f3-4f7b-4c2a-b7f5-5976d1867094",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lessons",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "lesson-uuid-here"
+                }
+              ]
+            },
+            "description": "Get lesson details"
+          }
+        },
+        {
+          "name": "Create Lesson",
+          "id": "4bf9cb52-f386-4ac4-bf84-3d8784d25e87",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"moduleId\": \"module-uuid-here\",\n  \"title\": \"Getting Started with HTML\",\n  \"description\": \"Learn the basics of HTML structure and syntax\",\n  \"lessonType\": \"video\",\n  \"videoAssetId\": \"mux-asset-id-here\",\n  \"orderIndex\": 1,\n  \"duration\": 900,\n  \"isFreePreview\": true,\n  \"isStandalone\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lessons"
+              ]
+            },
+            "description": "Create a new lesson"
+          }
+        },
+        {
+          "name": "Update Lesson",
+          "id": "61be8a76-ad0a-4e01-9eab-f4e5bd227c24",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Lesson Title\",\n  \"duration\": 1200,\n  \"isFreePreview\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lessons",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "lesson-uuid-here"
+                }
+              ]
+            },
+            "description": "Update lesson information"
+          }
+        },
+        {
+          "name": "Delete Lesson",
+          "id": "754024f2-3403-4875-a616-64d3694c365b",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "lessons",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "lesson-uuid-here"
+                }
+              ]
+            },
+            "description": "Delete a lesson"
+          }
+        }
+      ],
+      "id": "f8fe8116-518f-46c5-a65e-68672c08fd90"
+    },
+    {
+      "name": "Enrollments",
+      "item": [
+        {
+          "name": "Get User Enrollments (with includes)",
+          "id": "4b3003d8-bcec-48fb-bfc0-cb6f0660acd2",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/user/:userId?include=track&status=active",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "enrollments",
+                "user",
+                ":userId"
+              ],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "track",
+                  "description": "Allowed: track"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter by status: active, completed, dropped"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: Get user enrollments with optional track data via include parameter"
+          }
+        },
+        {
+          "name": "Enroll in Track",
+          "id": "c52adaf5-88fa-4106-ad90-3b6182576550",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"trackId\": \"track-uuid-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "enrollments"
+              ]
+            },
+            "description": "Enroll a user in a track"
+          }
+        }
+      ],
+      "id": "ba5f3516-29df-460c-818a-e10bd6255189"
+    },
+    {
+      "name": "Bookmarks",
+      "item": [
+        {
+          "name": "Get User Bookmarks (with includes)",
+          "id": "07a3d321-470a-4751-aad4-274bbb0d1812",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/user/:userId?include=details&type=lesson",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookmarks",
+                "user",
+                ":userId"
+              ],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "details",
+                  "description": "Allowed: details (fetches bookmarked item data)"
+                },
+                {
+                  "key": "type",
+                  "value": "lesson",
+                  "description": "Filter by type: lesson, track, post, product"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: Get user bookmarks with optional item details via include parameter"
+          }
+        },
+        {
+          "name": "Create Bookmark",
+          "id": "b959f80f-80d3-4f06-94ab-af8dac289125",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"bookmarkable_type\": \"lesson\",\n  \"bookmarkable_id\": \"lesson-uuid-here\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookmarks"
+              ]
+            },
+            "description": "Create a bookmark (polymorphic: lesson, track, post, product)"
+          }
+        },
+        {
+          "name": "Delete Bookmark by ID",
+          "id": "52e31490-da15-4e6b-8283-6ce7830d772b",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookmarks",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "bookmark-uuid-here"
+                }
+              ]
+            },
+            "description": "Delete a bookmark by its ID"
+          }
+        },
+        {
+          "name": "Delete Bookmark by Item",
+          "id": "5d5a992c-8de7-4559-9831-1f9152739bf0",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/user/:userId/:type/:itemId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "bookmarks",
+                "user",
+                ":userId",
+                ":type",
+                ":itemId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                },
+                {
+                  "key": "type",
+                  "value": "lesson"
+                },
+                {
+                  "key": "itemId",
+                  "value": "lesson-uuid-here"
+                }
+              ]
+            },
+            "description": "Delete a bookmark by user, type, and item ID"
+          }
+        }
+      ],
+      "id": "065948d0-5e6b-4de4-9688-5528b7ed78b2"
+    },
+    {
+      "name": "Communities",
+      "item": [
+        {
+          "name": "Get All Communities",
+          "id": "0e926b23-13e4-4bdf-8334-2c04b555603e",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities"
+              ]
+            },
+            "description": "Get all communities"
+          }
+        },
+        {
+          "name": "Get Community by ID",
+          "id": "67796eba-fffa-45b9-acf1-fee48d9cadf7",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "Get community details"
+          }
+        },
+        {
+          "name": "Create Community",
+          "id": "e38cdd08-f39a-4a63-a638-f36aab37510a",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Web Development Community\",\n  \"description\": \"A community for web developers\",\n  \"visibility\": \"public\",\n  \"created_by\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/communities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities"
+              ]
+            },
+            "description": "Create a new community"
+          }
+        },
+        {
+          "name": "Get Community Members (with includes)",
+          "id": "06b4a326-c0ed-474b-ac2c-9ced02a87a45",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members?include=profile&role=member",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                ":communityId",
+                "members"
+              ],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "profile",
+                  "description": "Allowed: profile"
+                },
+                {
+                  "key": "role",
+                  "value": "member",
+                  "description": "Filter by role: member, moderator, admin"
+                },
+                {
+                  "key": "limit",
+                  "value": "50",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: Get community members with optional profile data via include parameter"
+          }
+        },
+        {
+          "name": "Join Community",
+          "id": "dd9f4dca-84d3-481b-bf30-9f26725c0a76",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                ":communityId",
+                "members"
+              ],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                }
+              ]
+            },
+            "description": "Join a community"
+          }
+        },
+        {
+          "name": "Leave Community",
+          "id": "3866d216-5ce0-4967-a11c-db93745bc017",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                ":communityId",
+                "members",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Leave a community"
+          }
+        },
+        {
+          "name": "Update Member Role",
+          "id": "cb7415b7-8411-4d9b-8da0-80d93049e787",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"moderator\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/:communityId/members/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "communities",
+                ":communityId",
+                "members",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "communityId",
+                  "value": "{{communityId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Update member role (member, moderator, admin)"
+          }
+        }
+      ],
+      "id": "14d3d92c-9de8-4933-a20d-5eb1ca673cbb"
+    },
+    {
+      "name": "Posts",
+      "item": [
+        {
+          "name": "List Posts (with includes)",
+          "id": "0f85be6c-1db1-4e4b-930d-5f61ae34afe1",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?community_id={{communityId}}&include=author,reactions_count&limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "community_id",
+                  "value": "{{communityId}}",
+                  "description": "Filter by community"
+                },
+                {
+                  "key": "include",
+                  "value": "author,reactions_count",
+                  "description": "Allowed: author, reactions_count"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "TRANSITIONAL: List posts with optional author/reactions data via include parameter"
+          }
+        },
+        {
+          "name": "Get Post by ID",
+          "id": "7d85d01e-7f18-41d9-801a-2720cbf8cf21",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Get post details"
+          }
+        },
+        {
+          "name": "Create Post",
+          "id": "54f1880e-3823-4334-b8cd-47215cb0c570",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community_id\": \"{{communityId}}\",\n  \"author_id\": \"{{userId}}\",\n  \"content\": \"This is my post content\",\n  \"title\": \"Optional Title\",\n  \"post_type\": \"text\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts"
+              ]
+            },
+            "description": "Create a new post"
+          }
+        },
+        {
+          "name": "Update Post",
+          "id": "dc7f11ef-682f-4f24-90be-0f0d8fb54f1e",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated content\",\n  \"is_pinned\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Update post content"
+          }
+        },
+        {
+          "name": "Delete Post",
+          "id": "8b0af24d-f74d-4847-b39c-cd33519eeb90",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Soft delete a post"
+          }
+        },
+        {
+          "name": "Get Post Comments",
+          "id": "30806f31-c2cf-4470-81ad-a0d9a3a9c93d",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "comments"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Get comments for a post"
+          }
+        },
+        {
+          "name": "Create Comment",
+          "id": "1875e620-0dc1-41a5-9ffc-e124ee2e4f7b",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"content\": \"This is my comment\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "comments"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Add a comment to a post"
+          }
+        },
+        {
+          "name": "Get Post Reactions",
+          "id": "e3e13c77-8db0-4642-ac4c-3b04dc50956d",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "reactions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Get reaction counts for a post"
+          }
+        },
+        {
+          "name": "Get User's Reaction",
+          "id": "def883ff-d58f-40b5-9fcb-ab73165940e5",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions/user/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "reactions",
+                "user",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get current user's reaction on a post (returns hasReacted, emoji, reactedAt)"
+          }
+        },
+        {
+          "name": "Add Reaction",
+          "id": "784a250f-97c0-42a0-b9eb-d421285bf451",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"reaction_type\": \"👍\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "reactions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Add or update reaction on a post"
+          }
+        },
+        {
+          "name": "Remove Reaction",
+          "id": "002df4f6-a105-482e-b907-554f402a93f7",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/reactions/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "reactions",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Remove reaction from a post"
+          }
+        },
+        {
+          "name": "Report Post",
+          "id": "f95e54aa-33ee-4494-8f47-c4d8ee2aa654",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reporter_id\": \"{{userId}}\",\n  \"reason\": \"spam\",\n  \"description\": \"This post is spam\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/:id/report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "posts",
+                ":id",
+                "report"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{postId}}"
+                }
+              ]
+            },
+            "description": "Report a post"
+          }
+        }
+      ],
+      "id": "a7651e89-a30a-4512-aa03-3d86cfbd0bcd"
+    },
+    {
+      "name": "Live Events",
+      "item": [
+        {
+          "name": "Get All Live Events",
+          "id": "47f4557d-9875-4e58-83be-e63221d3387b",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events?status=upcoming",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "live-events"
+              ],
+              "query": [
+                {
+                  "key": "host_id",
+                  "value": "{{userId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "upcoming"
+                }
+              ]
+            },
+            "description": "Get all live events"
+          }
+        },
+        {
+          "name": "Get Live Event by ID",
+          "id": "4b01e784-e354-405b-b38a-044c5b9d0cb7",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "live-events",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Get live event details"
+          }
+        },
+        {
+          "name": "Create Live Event",
+          "id": "a403504a-1295-4e92-99bd-1e280bb5bca2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"host_id\": \"{{userId}}\",\n  \"title\": \"Live Q&A Session\",\n  \"description\": \"Join me for a live Q&A\",\n  \"scheduled_start\": \"2025-12-20T18:00:00Z\",\n  \"scheduled_end\": \"2025-12-20T19:00:00Z\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "live-events"
+              ]
+            },
+            "description": "Create a new live event"
+          }
+        },
+        {
+          "name": "Get Stream Credentials",
+          "id": "868cad73-a6af-4de4-b92b-c15840289df4",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id/credentials",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "live-events",
+                ":id",
+                "credentials"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Get stream credentials (host only)"
+          }
+        },
+        {
+          "name": "Get Chat History",
+          "id": "b9012649-da38-43bb-ad5f-c971eaab7b3a",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "live-events",
+                ":id",
+                "chat"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Get chat message history"
+          }
+        },
+        {
+          "name": "Send Chat Message",
+          "id": "ae9f4952-ca75-4589-9909-c09676cc3e93",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"message\": \"Hello everyone!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/live-events/:id/chat",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "live-events",
+                ":id",
+                "chat"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "event-uuid-here"
+                }
+              ]
+            },
+            "description": "Send a chat message"
+          }
+        }
+      ],
+      "id": "62de1983-128d-436a-8d1b-6738742681c5"
+    },
+    {
+      "name": "Subscriptions",
+      "item": [
+        {
+          "name": "Get Subscription Plans",
+          "id": "eb85111a-ce87-4cd4-b49b-12c4127222e5",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/plans",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "plans"
+              ]
+            },
+            "description": "Get all active subscription plans"
+          }
+        },
+        {
+          "name": "Get User Subscription",
+          "id": "eedbba46-8505-4f12-8990-89dd8bfe9ec1",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/user/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's active subscription"
+          }
+        },
+        {
+          "name": "Create Subscription",
+          "id": "6c7bab61-a449-49c6-92d4-6cc42683753e",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"plan_id\": \"plan-uuid-here\",\n  \"stripe_subscription_id\": \"sub_xxx\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions"
+              ]
+            },
+            "description": "Create a new subscription"
+          }
+        },
+        {
+          "name": "Cancel Subscription",
+          "id": "baddcf86-9128-4b9b-9b2e-198fbf28f3b0",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subscription-uuid-here"
+                }
+              ]
+            },
+            "description": "Cancel a subscription"
+          }
+        },
+        {
+          "name": "Get User Invoices",
+          "id": "966fe832-0c2b-4a31-ac86-ddb8b0d01add",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/subscriptions/user/:userId/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "subscriptions",
+                "user",
+                ":userId",
+                "invoices"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's invoice history"
+          }
+        }
+      ],
+      "id": "875b8f46-4a78-4f05-b8bd-17d0af7a4581"
+    },
+    {
+      "name": "Stripe Connect",
+      "item": [
+        {
+          "name": "Get Connect Account Status",
+          "id": "6402e63e-a017-4897-abdc-69aabac0a700",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/stripe-connect/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stripe-connect",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get educator's Stripe Connect account status"
+          }
+        },
+        {
+          "name": "Create Connect Account",
+          "id": "10aac3fa-7302-458b-96f9-08a12b52fc5d",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"stripe_account_id\": \"acct_xxx\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/stripe-connect",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stripe-connect"
+              ]
+            },
+            "description": "Create a Stripe Connect account record"
+          }
+        },
+        {
+          "name": "Get Payouts",
+          "id": "7cda130f-b3c0-45dc-9de5-b4628b421499",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/stripe-connect/:userId/payouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "stripe-connect",
+                ":userId",
+                "payouts"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get educator's payout history"
+          }
+        }
+      ],
+      "id": "29af63c4-8f78-417e-bf78-39fa55a7ddeb"
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get Admin Roles",
+          "id": "60bab692-e6cc-423f-bd2a-c979e0428c8c",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/roles/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "roles",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's admin roles"
+          }
+        },
+        {
+          "name": "Get Feature Flags",
+          "id": "2dc7d2b7-dd6b-499a-9d3a-12a17634723f",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/feature-flags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "feature-flags"
+              ]
+            },
+            "description": "Get all feature flags"
+          }
+        },
+        {
+          "name": "Get Audit Logs",
+          "id": "b16ea888-0e06-4ce4-adf2-2f223ba12084",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/audit-logs?limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "user_id",
+                  "value": "{{userId}}",
+                  "disabled": true
+                },
+                {
+                  "key": "action",
+                  "value": "user.login",
+                  "disabled": true
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Get audit logs with optional filtering"
+          }
+        },
+        {
+          "name": "Get Educator Agreements",
+          "id": "68f5f1c2-f72a-4722-86eb-ef94722899e3",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/educator-agreements/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "educator-agreements",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's educator agreement status"
+          }
+        },
+        {
+          "name": "Get Verified Badge Status",
+          "id": "6c721eba-3900-4239-8835-833f92e1f2b3",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/verified-badges/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "verified-badges",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get educator's verified badge status"
+          }
+        }
+      ],
+      "id": "06bedf02-f360-423a-870d-413f9ca8b9ca"
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get User Notifications",
+          "id": "b16c9e01-df3d-4735-b453-a8d229749003",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/user/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "user",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get all notifications for a user"
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "id": "4048d979-b2dc-482a-bc86-527f72aede2d",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications/:id/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                ":id",
+                "read"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification-uuid-here"
+                }
+              ]
+            },
+            "description": "Mark a notification as read"
+          }
+        }
+      ],
+      "id": "e8978114-b625-4ca3-9216-692a0c9c0917"
+    },
+    {
+      "name": "Certifications",
+      "item": [
+        {
+          "name": "Get User Certifications",
+          "id": "64ea570c-cd24-49c5-9c9a-9ab0bf7163f7",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/certifications/user/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certifications",
+                "user",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get all certifications for a user"
+          }
+        },
+        {
+          "name": "Get Certification by ID",
+          "id": "3724feda-835e-42a3-9d34-88ed1c94cf32",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/certifications/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "certifications",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "certification-uuid-here"
+                }
+              ]
+            },
+            "description": "Get certification details"
+          }
+        }
+      ],
+      "id": "1da1d03d-c94a-44c1-8979-99dd384f0237"
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "id": "dd5d8a1a-9931-4f79-905a-9edbdc701b14",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products"
+              ]
+            },
+            "description": "Get all active digital products"
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "id": "7af03b76-03c0-42cb-b07f-ae4bd4ae61f0",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/products/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product-uuid-here"
+                }
+              ]
+            },
+            "description": "Get product details"
+          }
+        }
+      ],
+      "id": "6eaa56d8-27d0-43f6-896d-842918d8da77"
+    },
+    {
+      "name": "Purchases",
+      "item": [
+        {
+          "name": "Get User Purchases",
+          "id": "d2f7a254-e08e-4fb2-b147-a76191b03d0c",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases/user/:userId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchases",
+                "user",
+                ":userId"
+              ],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            },
+            "description": "Get user's purchase history"
+          }
+        },
+        {
+          "name": "Create Purchase",
+          "id": "192c004d-cec5-411f-9fe0-964e5fbb8289",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"{{userId}}\",\n  \"product_id\": \"product-uuid-here\",\n  \"amount\": 29.99,\n  \"stripe_payment_intent_id\": \"pi_xxx\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/purchases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "purchases"
+              ]
+            },
+            "description": "Create a purchase record"
+          }
+        }
+      ],
+      "id": "503b6456-5458-4dd8-85e9-96ccb70d2a91"
+    },
+    {
+      "name": "Institutions",
+      "item": [
+        {
+          "name": "Get Institution by ID",
+          "id": "69fbdbca-f2af-43dc-8333-6fe2966c5056",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "institution-uuid-here"
+                }
+              ]
+            },
+            "description": "Get institution details"
+          }
+        },
+        {
+          "name": "Create Institution",
+          "id": "39e9a8b8-5859-4bcd-a7b0-d5591200abef",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example University\",\n  \"type\": \"university\",\n  \"admin_id\": \"{{userId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "institutions"
+              ]
+            },
+            "description": "Create a new institution"
+          }
+        },
+        {
+          "name": "Get Institution Members",
+          "id": "9c51801e-c5af-41d9-9a93-af76949a6e28",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/institutions/:id/members",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                ":id",
+                "members"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "institution-uuid-here"
+                }
+              ]
+            },
+            "description": "Get members of an institution"
+          }
+        }
+      ],
+      "id": "96f827cf-e433-4dbd-8703-e7ebf84823ea"
+    },
+    {
+      "name": "Health Check",
+      "id": "9ea24d30-3629-4a5a-993f-459b8e758142",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Check API and database health"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "id": "b8d4332f-c65b-4966-8f8b-9223e3c80a77",
+      "key": "baseUrl",
+      "value": "http://localhost:4000",
+      "type": "string"
+    },
+    {
+      "id": "428fea8b-3718-4fe8-8d3e-da3e839f598e",
+      "key": "userId",
+      "value": "user-uuid-here",
+      "type": "string"
+    },
+    {
+      "id": "5317a6f5-be2d-4522-a2bb-ab90e89a812d",
+      "key": "postId",
+      "value": "post-uuid-here",
+      "type": "string"
+    },
+    {
+      "id": "7398e404-3185-4562-ba64-b8d62c077706",
+      "key": "communityId",
+      "value": "community-uuid-here",
+      "type": "string"
+    }
+  ]
+}

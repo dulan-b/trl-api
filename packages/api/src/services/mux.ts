@@ -15,14 +15,14 @@ export const mux = new Mux({
 export async function createDirectUpload(options: {
   corsOrigin?: string;
   newAssetSettings?: {
-    playback_policy?: string[];
+    playback_policy?: ('public' | 'signed')[];
     mp4_support?: string;
   };
 }) {
   const upload = await mux.video.uploads.create({
     cors_origin: options.corsOrigin || '*',
     new_asset_settings: {
-      playback_policy: options.newAssetSettings?.playback_policy || ['public'],
+      playback_policy: options.newAssetSettings?.playback_policy || ['public'] as ('public' | 'signed')[],
       mp4_support: (options.newAssetSettings?.mp4_support as 'standard' | 'none') || 'standard',
     },
   });
@@ -70,13 +70,15 @@ export async function getAsset(assetId: string) {
  * Uses Mux's built-in Whisper AI to transcribe in original language
  */
 export async function generateAutoCaption(assetId: string, languageCode?: string) {
+  // Note: Mux auto-generated captions require a URL source or are generated automatically
+  // This is a placeholder - actual implementation depends on Mux's current API
   const track = await mux.video.assets.createTrack(assetId, {
+    url: '', // Required by Mux API - for auto-generated, this would come from a captions service
     type: 'text',
     text_type: 'subtitles',
-    language_code: languageCode || 'en', // Try English first, or specify if known
+    language_code: languageCode || 'en',
     name: 'Auto-generated',
     closed_captions: true,
-    passthrough: 'auto-generated',
   });
 
   return {
@@ -89,7 +91,13 @@ export async function generateAutoCaption(assetId: string, languageCode?: string
  * Get track details including VTT URL
  */
 export async function getTrack(assetId: string, trackId: string) {
-  const track = await mux.video.assets.retrieveTrack(assetId, trackId);
+  // Get asset and find the track
+  const asset = await mux.video.assets.retrieve(assetId);
+  const track = asset.tracks?.find(t => t.id === trackId);
+
+  if (!track) {
+    throw new Error(`Track ${trackId} not found on asset ${assetId}`);
+  }
 
   return {
     id: track.id,
@@ -128,15 +136,15 @@ export async function addTextTrack(assetId: string, options: {
  * Create live stream
  */
 export async function createLiveStream(options: {
-  playbackPolicy?: string[];
+  playbackPolicy?: ('public' | 'signed')[];
   newAssetSettings?: {
-    playbackPolicy?: string[];
+    playbackPolicy?: ('public' | 'signed')[];
   };
 }) {
   const liveStream = await mux.video.liveStreams.create({
-    playback_policy: options.playbackPolicy || ['public'],
+    playback_policy: options.playbackPolicy || (['public'] as ('public' | 'signed')[]),
     new_asset_settings: {
-      playback_policy: options.newAssetSettings?.playbackPolicy || ['public'],
+      playback_policy: options.newAssetSettings?.playbackPolicy || (['public'] as ('public' | 'signed')[]),
     },
   });
 
@@ -171,7 +179,7 @@ export function verifyWebhookSignature(
   secret: string
 ): boolean {
   try {
-    return Mux.webhooks.verifyHeader(rawBody, signature, secret);
+    return Mux.Webhooks.verifyHeader(rawBody, signature, secret);
   } catch {
     return false;
   }

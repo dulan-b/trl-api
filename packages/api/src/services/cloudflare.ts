@@ -1,6 +1,4 @@
-import { getEnvConfig } from '@trl/shared';
-
-const config = getEnvConfig();
+// Cloudflare Stream service
 
 /**
  * Cloudflare Stream service for web-based live streaming
@@ -66,7 +64,7 @@ export async function createCloudflareStream(options: {
     throw new Error(`Failed to create Cloudflare stream: ${error}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { result: any };
   const result = data.result;
 
   return {
@@ -102,7 +100,7 @@ export async function getCloudflareStream(streamId: string) {
     throw new Error(`Failed to get Cloudflare stream: ${error}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { result: any };
   const result = data.result;
 
   return {
@@ -161,7 +159,7 @@ export async function listCloudflareStreams() {
     throw new Error(`Failed to list Cloudflare streams: ${error}`);
   }
 
-  const data = await response.json();
+  const data = await response.json() as { result: any[] };
 
   return data.result.map((stream: any) => ({
     streamId: stream.uid,
