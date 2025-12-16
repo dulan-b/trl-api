@@ -18,6 +18,17 @@ import { notificationRoutes } from './routes/notifications.js';
 import { certificationRoutes } from './routes/certifications.js';
 import { communityRoutes } from './routes/communities.js';
 import { productRoutes } from './routes/products.js';
+import { userRoleRoutes } from './routes/userRoles.js';
+import { userInterestRoutes } from './routes/userInterests.js';
+import { liveEventRoutes } from './routes/liveEvents.js';
+import { postRoutes } from './routes/posts.js';
+import { communityMemberRoutes } from './routes/communityMembers.js';
+import { purchaseRoutes } from './routes/purchases.js';
+import { subscriptionRoutes } from './routes/subscriptions.js';
+import { stripeConnectRoutes } from './routes/stripeConnect.js';
+import { institutionRoutes } from './routes/institutions.js';
+import { adminRoutes } from './routes/admin.js';
+import { bookmarkRoutes } from './routes/bookmarks.js';
 
 const config = getEnvConfig();
 
@@ -96,6 +107,17 @@ await fastify.register(notificationRoutes, { prefix: '/api/notifications' });
 await fastify.register(certificationRoutes, { prefix: '/api/certifications' });
 await fastify.register(communityRoutes, { prefix: '/api/communities' });
 await fastify.register(productRoutes, { prefix: '/api/products' });
+await fastify.register(userRoleRoutes, { prefix: '/api/user-roles' });
+await fastify.register(userInterestRoutes, { prefix: '/api/user-interests' });
+await fastify.register(liveEventRoutes, { prefix: '/api/live-events' });
+await fastify.register(postRoutes, { prefix: '/api/posts' });
+await fastify.register(communityMemberRoutes, { prefix: '/api/communities' });
+await fastify.register(purchaseRoutes, { prefix: '/api/purchases' });
+await fastify.register(subscriptionRoutes, { prefix: '/api/subscriptions' });
+await fastify.register(stripeConnectRoutes, { prefix: '/api/stripe-connect' });
+await fastify.register(institutionRoutes, { prefix: '/api/institutions' });
+await fastify.register(adminRoutes, { prefix: '/api/admin' });
+await fastify.register(bookmarkRoutes, { prefix: '/api/bookmarks' });
 
 // 404 handler
 fastify.setNotFoundHandler((request, reply) => {

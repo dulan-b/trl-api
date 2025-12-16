@@ -8,9 +8,26 @@ import {
 /**
  * Create a new lesson
  */
+interface CreateLessonBody {
+  moduleId?: string;
+  title: string;
+  description?: string;
+  lessonType: string;
+  videoAssetId?: string;
+  contentMarkdown?: string;
+  orderIndex: number;
+  duration?: number;
+  isFreePreview?: boolean;
+  isStandalone?: boolean;
+  posterUrl?: string;
+  thumbnailUrl?: string;
+  videoDurationSeconds?: number;
+  contentData?: Record<string, any>;
+}
+
 export async function createLesson(
   request: FastifyRequest<{
-    Body: CreateLessonRequest & { moduleId: string };
+    Body: CreateLessonBody;
   }>,
   reply: FastifyReply
 ) {
@@ -24,6 +41,11 @@ export async function createLesson(
     orderIndex,
     duration,
     isFreePreview = false,
+    isStandalone = false,
+    posterUrl,
+    thumbnailUrl,
+    videoDurationSeconds,
+    contentData,
   } = request.body;
 
   try {
@@ -37,10 +59,15 @@ export async function createLesson(
         content_markdown,
         order_index,
         duration,
-        is_free_preview
+        is_free_preview,
+        is_standalone,
+        poster_url,
+        thumbnail_url,
+        video_duration_seconds,
+        content_data
       )
       VALUES (
-        ${moduleId},
+        ${moduleId || null},
         ${title},
         ${description || null},
         ${lessonType},
@@ -48,7 +75,12 @@ export async function createLesson(
         ${contentMarkdown || null},
         ${orderIndex},
         ${duration || null},
-        ${isFreePreview}
+        ${isFreePreview},
+        ${isStandalone},
+        ${posterUrl || null},
+        ${thumbnailUrl || null},
+        ${videoDurationSeconds || null},
+        ${contentData ? JSON.stringify(contentData) : null}
       )
       RETURNING *
     `;
@@ -111,6 +143,11 @@ export async function getLessonById(
       orderIndex: lesson.order_index,
       duration: lesson.duration,
       isFreePreview: lesson.is_free_preview,
+      isStandalone: lesson.is_standalone,
+      posterUrl: lesson.poster_url,
+      thumbnailUrl: lesson.thumbnail_url,
+      videoDurationSeconds: lesson.video_duration_seconds,
+      contentData: lesson.content_data,
       createdAt: lesson.created_at,
       updatedAt: lesson.updated_at,
     });
@@ -288,6 +325,132 @@ export async function listLessons(
     return reply.code(500).send({
       error: 'Internal Server Error',
       message: 'Failed to list lessons',
+    });
+  }
+}
+
+/**
+ * Get learning feed lessons with optional related data
+ *
+ * TRANSITIONAL IMPLEMENTATION: This uses an `include` query parameter to optionally
+ * join related tables. While functional and secure (whitelisted includes only),
+ * this exposes internal table structure to the client.
+ *
+ * TODO: Replace with purpose-built endpoints or a GraphQL-style approach
+ * that abstracts internal schema details from the API contract.
+ *
+ * Allowed includes: module, track, progress
+ */
+const FEED_ALLOWED_INCLUDES = ['module', 'track', 'progress'] as const;
+type FeedInclude = typeof FEED_ALLOWED_INCLUDES[number];
+
+export async function getLessonsFeed(
+  request: FastifyRequest<{
+    Querystring: {
+      user_id?: string;
+      include?: string;
+      interest_tags?: string;
+      is_standalone?: string;
+      limit?: string;
+      offset?: string;
+    };
+  }>,
+  reply: FastifyReply
+) {
+  try {
+    const {
+      user_id,
+      include,
+      interest_tags: interestTagsParam,
+      is_standalone,
+      limit = '20',
+      offset = '0'
+    } = request.query;
+
+    // Parse and whitelist includes - SECURITY: only allow predefined values
+    const requestedIncludes = (include?.split(',') || [])
+      .filter((i): i is FeedInclude => FEED_ALLOWED_INCLUDES.includes(i as FeedInclude));
+
+    const includeModule = requestedIncludes.includes('module');
+    const includeTrack = requestedIncludes.includes('track');
+    const includeProgress = requestedIncludes.includes('progress') && user_id;
+
+    // Parse interest tags for filtering
+    const interestTags = interestTagsParam?.split(',').filter(Boolean) || [];
+
+    // Build query dynamically based on includes
+    // Note: We use conditional SQL fragments with hardcoded table names (never user input)
+    let lessons;
+
+    if (includeModule || includeTrack || includeProgress) {
+      lessons = await sql`
+        SELECT
+          l.*
+          ${includeModule ? sql`, json_build_object(
+            'id', m.id,
+            'title', m.title,
+            'order_index', m.order_index
+          ) as module` : sql``}
+          ${includeTrack ? sql`, json_build_object(
+            'id', t.id,
+            'title', t.title,
+            'thumbnail_url', t.thumbnail_url,
+            'category', t.category,
+            'interest_tags', t.interest_tags
+          ) as track` : sql``}
+          ${includeProgress ? sql`, json_build_object(
+            'completed', COALESCE(lp.completed, false),
+            'watched_duration', COALESCE(lp.watched_duration, 0),
+            'last_watched_at', lp.last_watched_at
+          ) as progress` : sql``}
+        FROM lessons l
+        ${includeModule ? sql`LEFT JOIN modules m ON l.module_id = m.id` : sql``}
+        ${includeTrack ? sql`LEFT JOIN tracks t ON m.track_id = t.id` : sql``}
+        ${includeProgress ? sql`LEFT JOIN lesson_progress lp ON l.id = lp.lesson_id AND lp.user_id = ${user_id}` : sql``}
+        WHERE 1=1
+        ${is_standalone === 'true' ? sql`AND l.is_standalone = true` : sql``}
+        ${interestTags.length > 0 && includeTrack ? sql`AND t.interest_tags && ${interestTags}::text[]` : sql``}
+        ORDER BY l.created_at DESC
+        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
+      `;
+    } else {
+      // Simple query without joins
+      lessons = await sql`
+        SELECT * FROM lessons l
+        WHERE 1=1
+        ${is_standalone === 'true' ? sql`AND l.is_standalone = true` : sql``}
+        ORDER BY l.created_at DESC
+        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
+      `;
+    }
+
+    return reply.send({
+      data: lessons.map((lesson) => ({
+        id: lesson.id,
+        moduleId: lesson.module_id,
+        title: lesson.title,
+        description: lesson.description,
+        lessonType: lesson.lesson_type,
+        orderIndex: lesson.order_index,
+        duration: lesson.duration,
+        isFreePreview: lesson.is_free_preview,
+        isStandalone: lesson.is_standalone,
+        posterUrl: lesson.poster_url,
+        thumbnailUrl: lesson.thumbnail_url,
+        videoDurationSeconds: lesson.video_duration_seconds,
+        contentData: lesson.content_data,
+        createdAt: lesson.created_at,
+        ...(includeModule && lesson.module ? { module: lesson.module } : {}),
+        ...(includeTrack && lesson.track ? { track: lesson.track } : {}),
+        ...(includeProgress && lesson.progress ? { progress: lesson.progress } : {}),
+      })),
+      pagination: { limit: parseInt(limit), offset: parseInt(offset) },
+    });
+  } catch (error) {
+    request.log.error(error, 'Failed to get lessons feed');
+    return reply.code(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to retrieve lessons feed',
     });
   }
 }

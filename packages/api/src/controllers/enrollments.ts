@@ -149,45 +149,87 @@ export async function getEnrollmentById(
 }
 
 /**
- * List user's enrollments
+ * List user's enrollments with optional related data
+ *
+ * TRANSITIONAL IMPLEMENTATION: This uses an `include` query parameter to optionally
+ * join related tables. While functional and secure (whitelisted includes only),
+ * this exposes internal table structure to the client.
+ *
+ * TODO: Replace with purpose-built endpoints or a GraphQL-style approach
+ * that abstracts internal schema details from the API contract.
+ *
+ * Allowed includes: track
  */
+const ENROLLMENT_ALLOWED_INCLUDES = ['track'] as const;
+type EnrollmentInclude = typeof ENROLLMENT_ALLOWED_INCLUDES[number];
+
 export async function listStudentEnrollments(
   request: FastifyRequest<{
     Params: { studentId: string };
+    Querystring: {
+      status?: string;
+      include?: string;
+      limit?: string;
+      offset?: string;
+    };
   }>,
   reply: FastifyReply
 ) {
   const { studentId: userId } = request.params;
+  const { status, include, limit = '50', offset = '0' } = request.query;
+
+  // Parse and whitelist includes - SECURITY: only allow predefined values
+  const requestedIncludes = (include?.split(',') || [])
+    .filter((i): i is EnrollmentInclude => ENROLLMENT_ALLOWED_INCLUDES.includes(i as EnrollmentInclude));
+
+  const includeTrack = requestedIncludes.includes('track');
 
   try {
-    const enrollments = await sql`
-      SELECT
-        e.*,
-        t.title as track_title,
-        t.description as track_description,
-        t.thumbnail_url as track_thumbnail,
-        t.category
-      FROM enrollments e
-      JOIN tracks t ON e.track_id = t.id
-      WHERE e.user_id = ${userId}
-      ORDER BY e.enrolled_at DESC
-    `;
+    let enrollments;
+
+    if (includeTrack) {
+      enrollments = await sql`
+        SELECT
+          e.*,
+          json_build_object(
+            'id', t.id,
+            'title', t.title,
+            'description', t.description,
+            'thumbnail_url', t.thumbnail_url,
+            'category', t.category,
+            'level', t.level,
+            'estimated_hours', t.estimated_hours
+          ) as track
+        FROM enrollments e
+        LEFT JOIN tracks t ON e.track_id = t.id
+        WHERE e.user_id = ${userId}
+        ${status ? sql`AND e.status = ${status}` : sql``}
+        ORDER BY e.enrolled_at DESC
+        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
+      `;
+    } else {
+      enrollments = await sql`
+        SELECT e.*
+        FROM enrollments e
+        WHERE e.user_id = ${userId}
+        ${status ? sql`AND e.status = ${status}` : sql``}
+        ORDER BY e.enrolled_at DESC
+        LIMIT ${parseInt(limit)} OFFSET ${parseInt(offset)}
+      `;
+    }
 
     return reply.send({
-      enrollments: enrollments.map((enrollment) => ({
+      data: enrollments.map((enrollment) => ({
         id: enrollment.id,
-        track: {
-          id: enrollment.track_id,
-          title: enrollment.track_title,
-          description: enrollment.track_description,
-          thumbnailUrl: enrollment.track_thumbnail,
-          category: enrollment.category,
-        },
+        userId: enrollment.user_id,
+        trackId: enrollment.track_id,
         status: enrollment.status,
         progress: enrollment.progress,
         enrolledAt: enrollment.enrolled_at,
         completedAt: enrollment.completed_at,
+        ...(includeTrack && enrollment.track ? { track: enrollment.track } : {}),
       })),
+      pagination: { limit: parseInt(limit), offset: parseInt(offset) },
     });
   } catch (error) {
     request.log.error(error, 'Failed to list enrollments');

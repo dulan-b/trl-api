@@ -17,6 +17,9 @@ interface CreateTrackBody {
   category: string;
   level?: string;
   estimated_hours?: number;
+  interest_tags?: string[];
+  roadmap_tags?: string[];
+  translations?: Record<string, any>;
 }
 
 /**
@@ -158,6 +161,9 @@ export async function createTrack(
       category,
       level = 'beginner',
       estimated_hours = 1,
+      interest_tags,
+      roadmap_tags,
+      translations,
     } = request.body;
 
     const result = await sql`
@@ -172,7 +178,10 @@ export async function createTrack(
         thumbnail_url,
         category,
         level,
-        estimated_hours
+        estimated_hours,
+        interest_tags,
+        roadmap_tags,
+        translations
       )
       VALUES (
         ${title},
@@ -185,7 +194,10 @@ export async function createTrack(
         ${thumbnail_url || null},
         ${category},
         ${level},
-        ${estimated_hours}
+        ${estimated_hours},
+        ${interest_tags || null},
+        ${roadmap_tags || null},
+        ${translations ? JSON.stringify(translations) : null}
       )
       RETURNING *
     `;
@@ -223,6 +235,12 @@ export async function updateTrack(
       'is_active',
       'level',
       'estimated_hours',
+      'interest_tags',
+      'roadmap_tags',
+      'translations',
+      'category',
+      'certification_type',
+      'completion_requirement',
     ];
 
     const updateFields: string[] = [];

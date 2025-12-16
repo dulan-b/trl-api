@@ -6,12 +6,15 @@ interface ProfileParams {
 }
 
 interface CreateProfileBody {
+  id?: string; // Allow passing ID from Supabase auth
   email: string;
   full_name?: string;
-  role?: 'student' | 'educator' | 'institution' | 'admin';
+  role?: 'student' | 'educator' | 'admin';
   subscription_status?: string;
   subscription_tier?: string;
   avatar_url?: string;
+  preferred_language?: string;
+  show_content_in_language_first?: boolean;
 }
 
 interface UpdateProfileBody {
@@ -20,6 +23,8 @@ interface UpdateProfileBody {
   subscription_status?: string;
   subscription_tier?: string;
   avatar_url?: string;
+  preferred_language?: string;
+  show_content_in_language_first?: boolean;
 }
 
 /**
@@ -64,12 +69,15 @@ export async function createProfile(
 ) {
   try {
     const {
+      id,
       email,
       full_name,
       role = 'student',
       subscription_status = 'trial',
       subscription_tier,
       avatar_url,
+      preferred_language,
+      show_content_in_language_first,
     } = request.body;
 
     // Check if email already exists
@@ -84,25 +92,56 @@ export async function createProfile(
       });
     }
 
-    const result = await sql`
-      INSERT INTO profiles (
-        email,
-        full_name,
-        role,
-        subscription_status,
-        subscription_tier,
-        avatar_url
-      )
-      VALUES (
-        ${email},
-        ${full_name || null},
-        ${role},
-        ${subscription_status},
-        ${subscription_tier || null},
-        ${avatar_url || null}
-      )
-      RETURNING *
-    `;
+    // If ID is provided (from Supabase auth), use it; otherwise let DB generate
+    const result = id
+      ? await sql`
+          INSERT INTO profiles (
+            id,
+            email,
+            full_name,
+            role,
+            subscription_status,
+            subscription_tier,
+            avatar_url,
+            preferred_language,
+            show_content_in_language_first
+          )
+          VALUES (
+            ${id},
+            ${email},
+            ${full_name || null},
+            ${role},
+            ${subscription_status},
+            ${subscription_tier || null},
+            ${avatar_url || null},
+            ${preferred_language || null},
+            ${show_content_in_language_first ?? null}
+          )
+          RETURNING *
+        `
+      : await sql`
+          INSERT INTO profiles (
+            email,
+            full_name,
+            role,
+            subscription_status,
+            subscription_tier,
+            avatar_url,
+            preferred_language,
+            show_content_in_language_first
+          )
+          VALUES (
+            ${email},
+            ${full_name || null},
+            ${role},
+            ${subscription_status},
+            ${subscription_tier || null},
+            ${avatar_url || null},
+            ${preferred_language || null},
+            ${show_content_in_language_first ?? null}
+          )
+          RETURNING *
+        `;
 
     return reply.code(201).send(result[0]);
   } catch (error: any) {
@@ -125,45 +164,28 @@ export async function updateProfile(
     const { id } = request.params;
     const updates = request.body;
 
-    // Build dynamic update query
-    const setClauses: string[] = [];
-    const values: any[] = [];
-    let paramCount = 1;
-
-    if (updates.full_name !== undefined) {
-      setClauses.push(`full_name = $${paramCount++}`);
-      values.push(updates.full_name);
-    }
-    if (updates.role !== undefined) {
-      setClauses.push(`role = $${paramCount++}`);
-      values.push(updates.role);
-    }
-    if (updates.subscription_status !== undefined) {
-      setClauses.push(`subscription_status = $${paramCount++}`);
-      values.push(updates.subscription_status);
-    }
-    if (updates.subscription_tier !== undefined) {
-      setClauses.push(`subscription_tier = $${paramCount++}`);
-      values.push(updates.subscription_tier);
-    }
-    if (updates.avatar_url !== undefined) {
-      setClauses.push(`avatar_url = $${paramCount++}`);
-      values.push(updates.avatar_url);
-    }
-
-    if (setClauses.length === 0) {
+    // Check if any fields to update
+    const hasUpdates = Object.keys(updates).length > 0;
+    if (!hasUpdates) {
       return reply.code(400).send({
         error: 'Bad Request',
         message: 'No fields to update',
       });
     }
 
-    setClauses.push(`updated_at = NOW()`);
-    values.push(id);
+    // Build update object with only provided fields
+    const updateData: Record<string, any> = {};
+    if (updates.full_name !== undefined) updateData.full_name = updates.full_name;
+    if (updates.role !== undefined) updateData.role = updates.role;
+    if (updates.subscription_status !== undefined) updateData.subscription_status = updates.subscription_status;
+    if (updates.subscription_tier !== undefined) updateData.subscription_tier = updates.subscription_tier;
+    if (updates.avatar_url !== undefined) updateData.avatar_url = updates.avatar_url;
+    if (updates.preferred_language !== undefined) updateData.preferred_language = updates.preferred_language;
+    if (updates.show_content_in_language_first !== undefined) updateData.show_content_in_language_first = updates.show_content_in_language_first;
 
     const result = await sql`
       UPDATE profiles
-      SET ${sql(setClauses.join(', '))}
+      SET ${sql(updateData)}, updated_at = NOW()
       WHERE id = ${id}
       RETURNING *
     `;

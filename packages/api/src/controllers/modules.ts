@@ -10,6 +10,7 @@ interface CreateModuleBody {
   title: string;
   description?: string;
   order_index: number;
+  is_required?: boolean;
 }
 
 /**
@@ -53,20 +54,22 @@ export async function createModule(
   reply: FastifyReply
 ) {
   try {
-    const { track_id, title, description, order_index } = request.body;
+    const { track_id, title, description, order_index, is_required = false } = request.body;
 
     const result = await sql`
       INSERT INTO modules (
         track_id,
         title,
         description,
-        order_index
+        order_index,
+        is_required
       )
       VALUES (
         ${track_id},
         ${title},
         ${description || null},
-        ${order_index}
+        ${order_index},
+        ${is_required}
       )
       RETURNING *
     `;
@@ -95,7 +98,7 @@ export async function updateModule(
     const { id } = request.params;
     const updates = request.body;
 
-    const allowedFields = ['title', 'description', 'order_index'];
+    const allowedFields = ['title', 'description', 'order_index', 'is_required'];
     const updateFields: string[] = [];
     const values: any[] = [];
 
