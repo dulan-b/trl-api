@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "The Ready Lab API - Complete",
+    "name": "The Ready Lab API - MVP",
     "description": "Complete API collection for The Ready Lab educational platform with Neon PostgreSQL integration.\n\nUpdated: December 15, 2025 - Added include parameter endpoints for complex queries.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -27,6 +27,262 @@
     }
   ],
   "item": [
+    {
+      "name": "🧪 Test Data (Seeded)",
+      "description": "Pre-configured requests using seeded test data. Run seed-test-data.sql first.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "Get Test Student Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/11111111-1111-1111-1111-111111111111",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "11111111-1111-1111-1111-111111111111"]
+            }
+          }
+        },
+        {
+          "name": "Get Test Educator Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/profiles/22222222-2222-2222-2222-222222222222",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "profiles", "22222222-2222-2222-2222-222222222222"]
+            }
+          }
+        },
+        {
+          "name": "Get All Tracks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tracks"]
+            }
+          }
+        },
+        {
+          "name": "Get Psychology Track",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks/aaaa1111-1111-1111-1111-111111111111",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tracks", "aaaa1111-1111-1111-1111-111111111111"]
+            }
+          }
+        },
+        {
+          "name": "Get Track Modules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tracks/aaaa1111-1111-1111-1111-111111111111/modules",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "tracks", "aaaa1111-1111-1111-1111-111111111111", "modules"]
+            }
+          }
+        },
+        {
+          "name": "Get Module Lessons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/modules/bbbb1111-1111-1111-1111-111111111111/lessons",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "modules", "bbbb1111-1111-1111-1111-111111111111", "lessons"]
+            }
+          }
+        },
+        {
+          "name": "Get Lesson by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/lessons/cccc1111-1111-1111-1111-111111111111",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "lessons", "cccc1111-1111-1111-1111-111111111111"]
+            }
+          }
+        },
+        {
+          "name": "Get Student Enrollments (with track)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/user/11111111-1111-1111-1111-111111111111?include=track",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "user", "11111111-1111-1111-1111-111111111111"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "track"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Communities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities"]
+            }
+          }
+        },
+        {
+          "name": "Get Psychology Community",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/eeee1111-1111-1111-1111-111111111111",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", "eeee1111-1111-1111-1111-111111111111"]
+            }
+          }
+        },
+        {
+          "name": "Get Community Members (with profile)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/communities/eeee1111-1111-1111-1111-111111111111/members?include=profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "communities", "eeee1111-1111-1111-1111-111111111111", "members"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "profile"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "List Posts (with author)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts?community_id=eeee1111-1111-1111-1111-111111111111&include=author",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"],
+              "query": [
+                {
+                  "key": "community_id",
+                  "value": "eeee1111-1111-1111-1111-111111111111"
+                },
+                {
+                  "key": "include",
+                  "value": "author"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Post by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/posts/1111aaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts", "1111aaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"]
+            }
+          }
+        },
+        {
+          "name": "Get User Bookmarks (with details)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks/user/11111111-1111-1111-1111-111111111111?include=details",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookmarks", "user", "11111111-1111-1111-1111-111111111111"],
+              "query": [
+                {
+                  "key": "include",
+                  "value": "details"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Post (Test)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"community_id\": \"eeee1111-1111-1111-1111-111111111111\",\n  \"user_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"title\": \"Test Post from Postman\",\n  \"content\": \"This is a test post created via API\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/posts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "posts"]
+            }
+          }
+        },
+        {
+          "name": "Create Bookmark (Test)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"bookmarkable_type\": \"lesson\",\n  \"bookmarkable_id\": \"cccc2222-2222-2222-2222-222222222222\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/bookmarks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "bookmarks"]
+            }
+          }
+        }
+      ]
+    },
     {
       "name": "Health Check",
       "request": {
