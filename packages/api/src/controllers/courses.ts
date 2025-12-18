@@ -1,68 +1,297 @@
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { sql } from '../config/database.js';
-import {
-  CourseType,
-  type CreateCourseRequest,
-  type UpdateCourseRequest,
-  type CourseResponse,
-} from '@trl/shared';
 
 /**
- * Create a new course
+ * List courses (tracks) with filtering
  */
-export async function createCourse(
+export async function listCourses(
   request: FastifyRequest<{
-    Body: CreateCourseRequest & { educatorId: string };
+    Querystring: {
+      category?: string;
+      level?: string;
+      format?: string;
+      learning_style?: string;
+      is_active?: string;
+      is_featured?: string;
+      is_free?: string;
+      search?: string;
+      limit?: string;
+      offset?: string;
+    };
   }>,
   reply: FastifyReply
 ) {
   const {
-    educatorId,
+    category,
+    level,
+    format,
+    learning_style,
+    is_active,
+    is_featured,
+    is_free,
+    search,
+    limit = '20',
+    offset = '0',
+  } = request.query;
+
+  try {
+    // Build dynamic query
+    let query = `
+      SELECT
+        t.*,
+        p.full_name as instructor_name,
+        p.avatar_url as instructor_avatar
+      FROM tracks t
+      LEFT JOIN profiles p ON t.created_by = p.id
+      WHERE 1=1
+    `;
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (category) {
+      query += ` AND t.category = $${paramIndex++}`;
+      params.push(category);
+    }
+    if (level) {
+      query += ` AND t.level = $${paramIndex++}`;
+      params.push(level.toLowerCase());
+    }
+    if (format) {
+      query += ` AND t.format = $${paramIndex++}`;
+      params.push(format);
+    }
+    if (learning_style) {
+      query += ` AND t.learning_style = $${paramIndex++}`;
+      params.push(learning_style);
+    }
+    if (is_active !== undefined) {
+      query += ` AND t.is_active = $${paramIndex++}`;
+      params.push(is_active === 'true');
+    }
+    if (is_featured !== undefined) {
+      query += ` AND t.is_featured = $${paramIndex++}`;
+      params.push(is_featured === 'true');
+    }
+    if (is_free !== undefined) {
+      if (is_free === 'true') {
+        query += ` AND t.price = 0`;
+      } else {
+        query += ` AND t.price > 0`;
+      }
+    }
+    if (search) {
+      query += ` AND (t.title ILIKE $${paramIndex} OR t.description ILIKE $${paramIndex})`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    query += ` ORDER BY t.is_featured DESC, t.created_at DESC`;
+    query += ` LIMIT $${paramIndex++} OFFSET $${paramIndex}`;
+    params.push(parseInt(limit), parseInt(offset));
+
+    const courses = await sql.unsafe(query, params);
+
+    const response = courses.map((course: any) => ({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: parseFloat(course.price) || 0,
+      category: course.category,
+      level: course.level.charAt(0).toUpperCase() + course.level.slice(1), // Capitalize
+      thumbnailUrl: course.thumbnail_url,
+      estimatedHours: course.estimated_hours,
+      enrollmentCount: course.enrollment_count,
+      averageRating: parseFloat(course.average_rating) || 0,
+      format: course.format,
+      learningStyle: course.learning_style,
+      isFeatured: course.is_featured,
+      isActive: course.is_active,
+      instructorName: course.instructor_name || 'The Ready Lab',
+      instructorAvatar: course.instructor_avatar,
+      createdAt: course.created_at,
+    }));
+
+    return reply.send({
+      courses: response,
+      pagination: {
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        total: courses.length,
+      },
+    });
+  } catch (error) {
+    request.log.error(error, 'Failed to list courses');
+    return reply.code(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to list courses',
+    });
+  }
+}
+
+/**
+ * Get course by ID with modules and lessons
+ */
+export async function getCourseById(
+  request: FastifyRequest<{
+    Params: { id: string };
+  }>,
+  reply: FastifyReply
+) {
+  const { id } = request.params;
+
+  try {
+    // Get course with instructor info
+    const [course] = await sql`
+      SELECT
+        t.*,
+        p.full_name as instructor_name,
+        p.avatar_url as instructor_avatar
+      FROM tracks t
+      LEFT JOIN profiles p ON t.created_by = p.id
+      WHERE t.id = ${id}
+    `;
+
+    if (!course) {
+      return reply.code(404).send({
+        error: 'Not Found',
+        message: 'Course not found',
+      });
+    }
+
+    // Get modules with lessons
+    const modules = await sql`
+      SELECT
+        m.*,
+        (
+          SELECT json_agg(
+            json_build_object(
+              'id', l.id,
+              'title', l.title,
+              'description', l.description,
+              'contentType', l.content_type,
+              'contentUrl', l.content_url,
+              'duration', l.duration,
+              'orderIndex', l.order_index
+            ) ORDER BY l.order_index
+          )
+          FROM lessons l
+          WHERE l.module_id = m.id
+        ) as lessons
+      FROM modules m
+      WHERE m.track_id = ${id}
+      ORDER BY m.order_index
+    `;
+
+    return reply.send({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: parseFloat(course.price) || 0,
+      category: course.category,
+      level: course.level.charAt(0).toUpperCase() + course.level.slice(1),
+      thumbnailUrl: course.thumbnail_url,
+      estimatedHours: course.estimated_hours,
+      enrollmentCount: course.enrollment_count,
+      averageRating: parseFloat(course.average_rating) || 0,
+      format: course.format,
+      learningStyle: course.learning_style,
+      isFeatured: course.is_featured,
+      isActive: course.is_active,
+      certificationType: course.certification_type,
+      completionRequirement: course.completion_requirement,
+      instructor: {
+        id: course.created_by,
+        name: course.instructor_name || 'The Ready Lab',
+        avatarUrl: course.instructor_avatar,
+      },
+      modules: modules.map((m: any) => ({
+        id: m.id,
+        title: m.title,
+        description: m.description,
+        orderIndex: m.order_index,
+        lessons: m.lessons || [],
+      })),
+      createdAt: course.created_at,
+      updatedAt: course.updated_at,
+    });
+  } catch (error) {
+    request.log.error(error, 'Failed to get course');
+    return reply.code(500).send({
+      error: 'Internal Server Error',
+      message: 'Failed to retrieve course',
+    });
+  }
+}
+
+/**
+ * Create a new course (track)
+ */
+export async function createCourse(
+  request: FastifyRequest<{
+    Body: {
+      title: string;
+      description?: string;
+      price?: number;
+      category: string;
+      level?: string;
+      thumbnailUrl?: string;
+      estimatedHours?: number;
+      format?: string;
+      learningStyle?: string;
+      createdBy?: string;
+    };
+  }>,
+  reply: FastifyReply
+) {
+  const {
     title,
     description,
-    courseType,
-    teachingStyle = [],
-    language = 'en',
     price = 0,
-    isFree = false,
+    category,
+    level = 'beginner',
     thumbnailUrl,
+    estimatedHours = 1,
+    format = 'Video',
+    learningStyle = 'visual',
+    createdBy,
   } = request.body;
 
   try {
     const [course] = await sql`
-      INSERT INTO courses (
-        educator_id,
+      INSERT INTO tracks (
         title,
         description,
-        course_type,
-        teaching_style,
-        language,
         price,
-        is_free,
-        thumbnail_url
+        category,
+        level,
+        thumbnail_url,
+        estimated_hours,
+        format,
+        learning_style,
+        created_by
       )
       VALUES (
-        ${educatorId},
         ${title},
         ${description || null},
-        ${courseType},
-        ${sql.array(teachingStyle)},
-        ${language},
         ${price},
-        ${isFree},
-        ${thumbnailUrl || null}
+        ${category},
+        ${level},
+        ${thumbnailUrl || null},
+        ${estimatedHours},
+        ${format},
+        ${learningStyle},
+        ${createdBy || null}
       )
       RETURNING *
     `;
-
-    request.log.info({ courseId: course.id, educatorId }, 'Course created');
 
     return reply.code(201).send({
       id: course.id,
       title: course.title,
       description: course.description,
-      courseType: course.course_type,
-      isPublished: course.is_published,
+      price: parseFloat(course.price) || 0,
+      category: course.category,
+      level: course.level,
       createdAt: course.created_at,
     });
   } catch (error) {
@@ -75,114 +304,24 @@ export async function createCourse(
 }
 
 /**
- * Get course by ID with lessons and educator info
- */
-export async function getCourseById(
-  request: FastifyRequest<{
-    Params: { id: string };
-  }>,
-  reply: FastifyReply
-) {
-  const { id } = request.params;
-
-  try {
-    // Get course with educator info
-    const [course] = await sql`
-      SELECT
-        c.*,
-        up.full_name as educator_name,
-        up.profile_image_url as educator_image
-      FROM courses c
-      JOIN educator_profiles ep ON c.educator_id = ep.user_id
-      JOIN user_profiles up ON ep.user_id = up.id
-      WHERE c.id = ${id}
-    `;
-
-    if (!course) {
-      return reply.code(404).send({
-        error: 'Not Found',
-        message: 'Course not found',
-      });
-    }
-
-    // Get lessons
-    const lessons = await sql`
-      SELECT
-        id,
-        title,
-        description,
-        lesson_type,
-        order_index,
-        duration,
-        is_free_preview,
-        video_asset_id
-      FROM lessons
-      WHERE course_id = ${id}
-      ORDER BY order_index ASC
-    `;
-
-    // Get tags
-    const tags = await sql`
-      SELECT tag FROM course_tags WHERE course_id = ${id}
-    `;
-
-    // Build response
-    const response: CourseResponse = {
-      id: course.id,
-      educator: {
-        id: course.educator_id,
-        fullName: course.educator_name,
-        profileImageUrl: course.educator_image,
-      },
-      title: course.title,
-      description: course.description,
-      courseType: course.course_type,
-      teachingStyle: course.teaching_style,
-      language: course.language,
-      price: parseFloat(course.price),
-      isFree: course.is_free,
-      isPublished: course.is_published,
-      publishedAt: course.published_at,
-      thumbnailUrl: course.thumbnail_url,
-      previewVideoId: course.preview_video_id,
-      totalEnrollments: course.total_enrollments,
-      totalCompletions: course.total_completions,
-      averageRating: parseFloat(course.average_rating),
-      totalReviews: course.total_reviews,
-      tags: tags.map((t) => t.tag),
-      lessons: lessons.map((l) => ({
-        id: l.id,
-        title: l.title,
-        description: l.description,
-        lessonType: l.lesson_type,
-        orderIndex: l.order_index,
-        duration: l.duration,
-        isFreePreview: l.is_free_preview,
-        isLocked: false, // TODO: Calculate based on enrollment/progress
-        videoUrl: l.video_asset_id ? `/api/videos/${l.video_asset_id}` : undefined,
-        createdAt: l.created_at,
-      })),
-      createdAt: course.created_at,
-      updatedAt: course.updated_at,
-    };
-
-    return reply.send(response);
-  } catch (error) {
-    request.log.error(error, 'Failed to get course');
-    return reply.code(500).send({
-      error: 'Internal Server Error',
-      message: 'Failed to retrieve course',
-    });
-  }
-}
-
-/**
  * Update course
  */
 export async function updateCourse(
   request: FastifyRequest<{
     Params: { id: string };
-    Body: UpdateCourseRequest;
+    Body: {
+      title?: string;
+      description?: string;
+      price?: number;
+      category?: string;
+      level?: string;
+      thumbnailUrl?: string;
+      estimatedHours?: number;
+      format?: string;
+      learningStyle?: string;
+      isActive?: boolean;
+      isFeatured?: boolean;
+    };
   }>,
   reply: FastifyReply
 ) {
@@ -190,6 +329,7 @@ export async function updateCourse(
   const updates = request.body;
 
   try {
+    // Build dynamic update query
     const updateFields: string[] = [];
     const values: any[] = [];
     let paramIndex = 1;
@@ -202,29 +342,41 @@ export async function updateCourse(
       updateFields.push(`description = $${paramIndex++}`);
       values.push(updates.description);
     }
-    if (updates.courseType !== undefined) {
-      updateFields.push(`course_type = $${paramIndex++}`);
-      values.push(updates.courseType);
-    }
-    if (updates.teachingStyle !== undefined) {
-      updateFields.push(`teaching_style = $${paramIndex++}`);
-      values.push(sql.array(updates.teachingStyle));
-    }
-    if (updates.language !== undefined) {
-      updateFields.push(`language = $${paramIndex++}`);
-      values.push(updates.language);
-    }
     if (updates.price !== undefined) {
       updateFields.push(`price = $${paramIndex++}`);
       values.push(updates.price);
     }
-    if (updates.isFree !== undefined) {
-      updateFields.push(`is_free = $${paramIndex++}`);
-      values.push(updates.isFree);
+    if (updates.category !== undefined) {
+      updateFields.push(`category = $${paramIndex++}`);
+      values.push(updates.category);
+    }
+    if (updates.level !== undefined) {
+      updateFields.push(`level = $${paramIndex++}`);
+      values.push(updates.level);
     }
     if (updates.thumbnailUrl !== undefined) {
       updateFields.push(`thumbnail_url = $${paramIndex++}`);
       values.push(updates.thumbnailUrl);
+    }
+    if (updates.estimatedHours !== undefined) {
+      updateFields.push(`estimated_hours = $${paramIndex++}`);
+      values.push(updates.estimatedHours);
+    }
+    if (updates.format !== undefined) {
+      updateFields.push(`format = $${paramIndex++}`);
+      values.push(updates.format);
+    }
+    if (updates.learningStyle !== undefined) {
+      updateFields.push(`learning_style = $${paramIndex++}`);
+      values.push(updates.learningStyle);
+    }
+    if (updates.isActive !== undefined) {
+      updateFields.push(`is_active = $${paramIndex++}`);
+      values.push(updates.isActive);
+    }
+    if (updates.isFeatured !== undefined) {
+      updateFields.push(`is_featured = $${paramIndex++}`);
+      values.push(updates.isFeatured);
     }
 
     if (updateFields.length === 0) {
@@ -234,14 +386,17 @@ export async function updateCourse(
       });
     }
 
+    updateFields.push(`updated_at = NOW()`);
     values.push(id);
 
-    const [course] = await sql`
-      UPDATE courses
-      SET ${sql.unsafe(updateFields.join(', '))}
-      WHERE id = ${id}
+    const query = `
+      UPDATE tracks
+      SET ${updateFields.join(', ')}
+      WHERE id = $${paramIndex}
       RETURNING *
     `;
+
+    const [course] = await sql.unsafe(query, values);
 
     if (!course) {
       return reply.code(404).send({
@@ -250,12 +405,9 @@ export async function updateCourse(
       });
     }
 
-    request.log.info({ courseId: id }, 'Course updated');
-
     return reply.send({
       id: course.id,
       title: course.title,
-      description: course.description,
       updatedAt: course.updated_at,
     });
   } catch (error) {
@@ -280,7 +432,7 @@ export async function deleteCourse(
 
   try {
     const result = await sql`
-      DELETE FROM courses WHERE id = ${id} RETURNING id
+      DELETE FROM tracks WHERE id = ${id} RETURNING id
     `;
 
     if (result.length === 0) {
@@ -290,334 +442,12 @@ export async function deleteCourse(
       });
     }
 
-    request.log.info({ courseId: id }, 'Course deleted');
-
     return reply.code(204).send();
   } catch (error) {
     request.log.error(error, 'Failed to delete course');
     return reply.code(500).send({
       error: 'Internal Server Error',
       message: 'Failed to delete course',
-    });
-  }
-}
-
-/**
- * List courses with filtering
- */
-export async function listCourses(
-  request: FastifyRequest<{
-    Querystring: {
-      educatorId?: string;
-      courseType?: CourseType;
-      isPublished?: boolean;
-      isFree?: boolean;
-      search?: string;
-      limit?: number;
-      offset?: number;
-    };
-  }>,
-  reply: FastifyReply
-) {
-  const {
-    educatorId,
-    courseType,
-    isPublished,
-    isFree,
-    search,
-    limit = 20,
-    offset = 0,
-  } = request.query;
-
-  try {
-    const conditions: string[] = [];
-    const params: any[] = [];
-    let paramIndex = 1;
-
-    if (educatorId) {
-      conditions.push(`c.educator_id = $${paramIndex++}`);
-      params.push(educatorId);
-    }
-    if (courseType) {
-      conditions.push(`c.course_type = $${paramIndex++}`);
-      params.push(courseType);
-    }
-    if (isPublished !== undefined) {
-      conditions.push(`c.is_published = $${paramIndex++}`);
-      params.push(isPublished);
-    }
-    if (isFree !== undefined) {
-      conditions.push(`c.is_free = $${paramIndex++}`);
-      params.push(isFree);
-    }
-    if (search) {
-      conditions.push(`(c.title ILIKE $${paramIndex} OR c.description ILIKE $${paramIndex})`);
-      params.push(`%${search}%`);
-      paramIndex++;
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-
-    params.push(limit, offset);
-
-    const courses = await sql`
-      SELECT
-        c.*,
-        up.full_name as educator_name,
-        up.profile_image_url as educator_image
-      FROM courses c
-      JOIN educator_profiles ep ON c.educator_id = ep.user_id
-      JOIN user_profiles up ON ep.user_id = up.id
-      ${sql.unsafe(whereClause)}
-      ORDER BY c.created_at DESC
-      LIMIT $${paramIndex++}
-      OFFSET $${paramIndex}
-    `.values(params);
-
-    const response = courses.map((course) => ({
-      id: course.id,
-      educator: {
-        id: course.educator_id,
-        fullName: course.educator_name,
-        profileImageUrl: course.educator_image,
-      },
-      title: course.title,
-      description: course.description,
-      courseType: course.course_type,
-      price: parseFloat(course.price),
-      isFree: course.is_free,
-      isPublished: course.is_published,
-      thumbnailUrl: course.thumbnail_url,
-      totalEnrollments: course.total_enrollments,
-      averageRating: parseFloat(course.average_rating),
-      createdAt: course.created_at,
-    }));
-
-    return reply.send({
-      courses: response,
-      pagination: {
-        limit,
-        offset,
-        total: courses.length,
-      },
-    });
-  } catch (error) {
-    request.log.error(error, 'Failed to list courses');
-    return reply.code(500).send({
-      error: 'Internal Server Error',
-      message: 'Failed to list courses',
-    });
-  }
-}
-
-/**
- * Create a course with lessons in one transaction
- * Allows creating videos, text content, and quizzes all at once
- *
- * TODO: Add authentication to ensure only educators can create courses
- */
-export async function createCourseWithLessons(
-  request: FastifyRequest<{
-    Body: CreateCourseRequest & {
-      educatorId: string;
-      lessons?: Array<{
-        title: string;
-        description?: string;
-        lessonType: 'video' | 'reading' | 'quiz';
-        videoAssetId?: string;
-        contentMarkdown?: string;
-        orderIndex: number;
-        duration?: number;
-        isFreePreview?: boolean;
-        quiz?: {
-          passingScore: number;
-          maxAttempts: number;
-          questions: Array<{
-            question: string;
-            options: string[];
-            correctAnswer: number;
-            explanation?: string;
-          }>;
-        };
-      }>;
-    };
-  }>,
-  reply: FastifyReply
-) {
-  const {
-    educatorId,
-    title,
-    description,
-    courseType,
-    teachingStyle = [],
-    language = 'en',
-    price = 0,
-    isFree = false,
-    thumbnailUrl,
-    lessons = [],
-  } = request.body;
-
-  try {
-    // Begin transaction by creating the course first
-    const [course] = await sql`
-      INSERT INTO courses (
-        educator_id,
-        title,
-        description,
-        course_type,
-        teaching_style,
-        language,
-        price,
-        is_free,
-        thumbnail_url
-      )
-      VALUES (
-        ${educatorId},
-        ${title},
-        ${description || null},
-        ${courseType},
-        ${sql.array(teachingStyle)},
-        ${language},
-        ${price},
-        ${isFree},
-        ${thumbnailUrl || null}
-      )
-      RETURNING *
-    `;
-
-    request.log.info({ courseId: course.id, educatorId }, 'Course created');
-
-    const createdLessons = [];
-
-    // Create each lesson
-    for (const lesson of lessons) {
-      const [createdLesson] = await sql`
-        INSERT INTO lessons (
-          course_id,
-          title,
-          description,
-          lesson_type,
-          video_asset_id,
-          content_markdown,
-          order_index,
-          duration,
-          is_free_preview
-        )
-        VALUES (
-          ${course.id},
-          ${lesson.title},
-          ${lesson.description || null},
-          ${lesson.lessonType},
-          ${lesson.videoAssetId || null},
-          ${lesson.contentMarkdown || null},
-          ${lesson.orderIndex},
-          ${lesson.duration || null},
-          ${lesson.isFreePreview || false}
-        )
-        RETURNING *
-      `;
-
-      // If this is a quiz lesson, create the quiz
-      if (lesson.lessonType === 'quiz' && lesson.quiz) {
-        const [quiz] = await sql`
-          INSERT INTO quizzes (
-            lesson_id,
-            passing_score,
-            max_attempts,
-            questions
-          )
-          VALUES (
-            ${createdLesson.id},
-            ${lesson.quiz.passingScore},
-            ${lesson.quiz.maxAttempts},
-            ${sql.json(lesson.quiz.questions)}
-          )
-          RETURNING *
-        `;
-
-        createdLessons.push({
-          ...createdLesson,
-          quiz: {
-            id: quiz.id,
-            passingScore: quiz.passing_score,
-            maxAttempts: quiz.max_attempts,
-          },
-        });
-      } else {
-        createdLessons.push(createdLesson);
-      }
-    }
-
-    request.log.info(
-      { courseId: course.id, lessonCount: createdLessons.length },
-      'Course with lessons created'
-    );
-
-    return reply.code(201).send({
-      course: {
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        courseType: course.course_type,
-        isPublished: course.is_published,
-        createdAt: course.created_at,
-      },
-      lessons: createdLessons.map((l) => ({
-        id: l.id,
-        title: l.title,
-        lessonType: l.lesson_type,
-        orderIndex: l.order_index,
-        ...(l.quiz && { quiz: l.quiz }),
-      })),
-    });
-  } catch (error) {
-    request.log.error(error, 'Failed to create course with lessons');
-    return reply.code(500).send({
-      error: 'Internal Server Error',
-      message: 'Failed to create course with lessons',
-    });
-  }
-}
-
-/**
- * Publish a course
- */
-export async function publishCourse(
-  request: FastifyRequest<{
-    Params: { id: string };
-  }>,
-  reply: FastifyReply
-) {
-  const { id } = request.params;
-
-  try {
-    const [course] = await sql`
-      UPDATE courses
-      SET is_published = TRUE, published_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `;
-
-    if (!course) {
-      return reply.code(404).send({
-        error: 'Not Found',
-        message: 'Course not found',
-      });
-    }
-
-    request.log.info({ courseId: id }, 'Course published');
-
-    return reply.send({
-      id: course.id,
-      title: course.title,
-      isPublished: course.is_published,
-      publishedAt: course.published_at,
-    });
-  } catch (error) {
-    request.log.error(error, 'Failed to publish course');
-    return reply.code(500).send({
-      error: 'Internal Server Error',
-      message: 'Failed to publish course',
     });
   }
 }

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import {
   getCommunities,
+  getCommunityById,
   createCommunity,
   getPostsByCommunityId,
   createPost,
@@ -12,6 +13,12 @@ export async function communityRoutes(fastify: FastifyInstance) {
   fastify.get('/', {
     onRequest: [optionalAuth],
     handler: getCommunities,
+  });
+
+  // Get community by ID
+  fastify.get('/:id', {
+    onRequest: [optionalAuth],
+    handler: getCommunityById,
   });
 
   // Create community
