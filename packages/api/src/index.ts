@@ -31,6 +31,7 @@ import { adminRoutes } from './routes/admin.js';
 import { bookmarkRoutes } from './routes/bookmarks.js';
 import { microLessonRoutes } from './routes/microLessons.js';
 import { communityPollRoutes } from './routes/communityPolls.js';
+import { demoRequestRoutes } from './routes/demoRequests.js';
 
 const config = getEnvConfig();
 
@@ -122,6 +123,7 @@ await fastify.register(adminRoutes, { prefix: '/api/admin' });
 await fastify.register(bookmarkRoutes, { prefix: '/api/bookmarks' });
 await fastify.register(microLessonRoutes, { prefix: '/api/micro-lessons' });
 await fastify.register(communityPollRoutes, { prefix: '/api/community-polls' });
+await fastify.register(demoRequestRoutes, { prefix: '/api/demo-requests' });
 
 // 404 handler
 fastify.setNotFoundHandler((request, reply) => {

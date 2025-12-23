@@ -26,9 +26,9 @@ interface UpdatePostBody {
 /**
  * List posts with optional related data
  *
- * Allowed includes: author
+ * Allowed includes: author, community
  */
-const POST_ALLOWED_INCLUDES = ['author'] as const;
+const POST_ALLOWED_INCLUDES = ['author', 'community'] as const;
 type PostInclude = typeof POST_ALLOWED_INCLUDES[number];
 
 export async function listPosts(
@@ -52,33 +52,31 @@ export async function listPosts(
       .filter((i): i is PostInclude => POST_ALLOWED_INCLUDES.includes(i as PostInclude));
 
     const includeAuthor = requestedIncludes.includes('author');
+    const includeCommunity = requestedIncludes.includes('community');
 
-    let posts;
-
-    if (includeAuthor) {
-      posts = await sql`
-        SELECT
-          p.*,
-          json_build_object(
-            'id', pr.id,
-            'full_name', pr.full_name,
-            'avatar_url', pr.avatar_url
-          ) as author
-        FROM posts p
-        LEFT JOIN profiles pr ON p.user_id = pr.id
-        ${community_id ? sql`WHERE p.community_id = ${community_id}` : sql``}
-        ORDER BY p.created_at DESC
-        LIMIT ${limitNum} OFFSET ${offsetNum}
-      `;
-    } else {
-      posts = await sql`
-        SELECT p.*
-        FROM posts p
-        ${community_id ? sql`WHERE p.community_id = ${community_id}` : sql``}
-        ORDER BY p.created_at DESC
-        LIMIT ${limitNum} OFFSET ${offsetNum}
-      `;
-    }
+    // Build query with optional joins
+    const posts = await sql`
+      SELECT
+        p.*
+        ${includeAuthor ? sql`,
+        json_build_object(
+          'id', pr.id,
+          'full_name', pr.full_name,
+          'avatar_url', pr.avatar_url
+        ) as author` : sql``}
+        ${includeCommunity ? sql`,
+        json_build_object(
+          'id', c.id,
+          'name', c.name,
+          'category', c.category
+        ) as community` : sql``}
+      FROM posts p
+      ${includeAuthor ? sql`LEFT JOIN profiles pr ON p.user_id = pr.id` : sql``}
+      ${includeCommunity ? sql`LEFT JOIN communities c ON p.community_id = c.id` : sql``}
+      ${community_id ? sql`WHERE p.community_id = ${community_id}` : sql``}
+      ORDER BY p.created_at DESC
+      LIMIT ${limitNum} OFFSET ${offsetNum}
+    `;
 
     return reply.send({
       data: posts.map(post => ({
@@ -93,6 +91,7 @@ export async function listPosts(
         createdAt: post.created_at,
         updatedAt: post.updated_at,
         ...(includeAuthor && post.author ? { author: post.author } : {}),
+        ...(includeCommunity && post.community ? { community: post.community } : {}),
       })),
       pagination: { limit: limitNum, offset: offsetNum },
     });
@@ -373,7 +372,12 @@ export async function addPostReaction(
     const { id } = request.params;
     const { user_id, reaction_type } = request.body;
 
-    // Upsert reaction
+    // Check if reaction already exists
+    const existing = await sql`
+      SELECT * FROM post_reactions WHERE post_id = ${id} AND user_id = ${user_id}
+    `;
+
+    // Insert or update reaction
     const result = await sql`
       INSERT INTO post_reactions (post_id, user_id, reaction_type)
       VALUES (${id}, ${user_id}, ${reaction_type})
@@ -381,8 +385,8 @@ export async function addPostReaction(
       RETURNING *
     `;
 
-    // Update likes count if it's a like
-    if (reaction_type === 'like') {
+    // Only update likes count if this is a NEW like (not an update)
+    if (reaction_type === 'like' && existing.length === 0) {
       await sql`UPDATE posts SET likes_count = likes_count + 1 WHERE id = ${id}`;
     }
 
