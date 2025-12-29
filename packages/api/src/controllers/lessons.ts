@@ -206,6 +206,22 @@ export async function updateLesson(
       updateFields.push(`is_free_preview = $${paramIndex++}`);
       values.push(updates.isFreePreview);
     }
+    if ((updates as any).posterUrl !== undefined) {
+      updateFields.push(`poster_url = $${paramIndex++}`);
+      values.push((updates as any).posterUrl);
+    }
+    if ((updates as any).thumbnailUrl !== undefined) {
+      updateFields.push(`thumbnail_url = $${paramIndex++}`);
+      values.push((updates as any).thumbnailUrl);
+    }
+    if ((updates as any).videoDurationSeconds !== undefined) {
+      updateFields.push(`video_duration_seconds = $${paramIndex++}`);
+      values.push((updates as any).videoDurationSeconds);
+    }
+    if ((updates as any).contentData !== undefined) {
+      updateFields.push(`content_data = $${paramIndex++}`);
+      values.push(JSON.stringify((updates as any).contentData));
+    }
 
     if (updateFields.length === 0) {
       return reply.code(400).send({

@@ -21,7 +21,7 @@ export async function videoRoutes(fastify: FastifyInstance) {
   });
 
   // Create direct upload URL
-  fastify.post('/uploads', {
+  fastify.post('/upload', {
     onRequest: [optionalAuth],
     handler: createVideoUpload,
   });
