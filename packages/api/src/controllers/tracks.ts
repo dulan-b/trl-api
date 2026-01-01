@@ -17,9 +17,6 @@ interface CreateTrackBody {
   category: string;
   level?: string;
   estimated_hours?: number;
-  interest_tags?: string[];
-  roadmap_tags?: string[];
-  translations?: Record<string, any>;
 }
 
 /**
@@ -103,7 +100,7 @@ export async function listTracks(
     request.log.error(error);
     return reply.code(500).send({
       error: 'Internal Server Error',
-      message: error.message,
+      message: 'Failed to retrieve tracks',
     });
   }
 }
@@ -136,7 +133,7 @@ export async function getTrackById(
     request.log.error(error);
     return reply.code(500).send({
       error: 'Internal Server Error',
-      message: error.message,
+      message: 'Failed to retrieve track',
     });
   }
 }
@@ -161,9 +158,6 @@ export async function createTrack(
       category,
       level = 'beginner',
       estimated_hours = 1,
-      interest_tags,
-      roadmap_tags,
-      translations,
     } = request.body;
 
     const result = await sql`
@@ -178,10 +172,7 @@ export async function createTrack(
         thumbnail_url,
         category,
         level,
-        estimated_hours,
-        interest_tags,
-        roadmap_tags,
-        translations
+        estimated_hours
       )
       VALUES (
         ${title},
@@ -194,10 +185,7 @@ export async function createTrack(
         ${thumbnail_url || null},
         ${category},
         ${level},
-        ${estimated_hours},
-        ${interest_tags || null},
-        ${roadmap_tags || null},
-        ${translations ? JSON.stringify(translations) : null}
+        ${estimated_hours}
       )
       RETURNING *
     `;
@@ -207,7 +195,7 @@ export async function createTrack(
     request.log.error(error);
     return reply.code(500).send({
       error: 'Internal Server Error',
-      message: error.message,
+      message: 'Failed to create track',
     });
   }
 }
@@ -235,9 +223,6 @@ export async function updateTrack(
       'is_active',
       'level',
       'estimated_hours',
-      'interest_tags',
-      'roadmap_tags',
-      'translations',
       'category',
       'certification_type',
       'completion_requirement',
@@ -286,7 +271,7 @@ export async function updateTrack(
     request.log.error(error);
     return reply.code(500).send({
       error: 'Internal Server Error',
-      message: error.message,
+      message: 'Failed to update track',
     });
   }
 }
@@ -313,7 +298,7 @@ export async function getTrackModules(
     request.log.error(error);
     return reply.code(500).send({
       error: 'Internal Server Error',
-      message: error.message,
+      message: 'Failed to retrieve modules',
     });
   }
 }

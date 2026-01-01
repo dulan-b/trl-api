@@ -2,7 +2,7 @@ import { sql } from '../config/database.js';
 
 async function checkCurrentSchema() {
   try {
-    console.log('🔍 Checking what tables ACTUALLY exist in the Neon database...\n');
+    console.log('🔍 Checking what tables ACTUALLY exist in the database...\n');
 
     // Get all tables
     const tables = await sql`

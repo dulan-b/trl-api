@@ -23,7 +23,6 @@ export async function createDirectUpload(options: {
     cors_origin: options.corsOrigin || '*',
     new_asset_settings: {
       playback_policy: options.newAssetSettings?.playback_policy || ['public'] as ('public' | 'signed')[],
-      mp4_support: (options.newAssetSettings?.mp4_support as 'standard' | 'none') || 'standard',
     },
   });
 
@@ -40,7 +39,6 @@ export async function createAssetFromUrl(url: string) {
   const asset = await mux.video.assets.create({
     input: [{ url }],
     playback_policy: ['public'],
-    mp4_support: 'standard',
   });
 
   return {

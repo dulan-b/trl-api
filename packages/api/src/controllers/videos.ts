@@ -15,46 +15,29 @@ export async function createVideoUpload(
     Body: {
       title: string;
       description?: string;
-      ownerId: string;
+      ownerId?: string;
       corsOrigin?: string;
     };
   }>,
   reply: FastifyReply
 ) {
-  const { title, description, ownerId, corsOrigin } = request.body;
+  const { title, corsOrigin } = request.body;
 
   try {
-    // Create Mux direct upload
+    // Create Mux direct upload - Mux handles all storage
     const { uploadUrl, uploadId } = await muxService.createDirectUpload({
       corsOrigin,
     });
 
-    // Create video record in database
-    const [video] = await sql`
-      INSERT INTO video_assets (
-        title,
-        description,
-        owner_id,
-        status,
-        mux_upload_id
-      )
-      VALUES (
-        ${title},
-        ${description || null},
-        ${ownerId},
-        ${VideoStatus.UPLOADING},
-        ${uploadId}
-      )
-      RETURNING id, title, status, created_at
-    `;
+    request.log.info({ uploadId, title }, 'Created Mux direct upload');
 
-    request.log.info({ videoId: video.id, uploadId }, 'Created video upload');
-
+    // Return the upload URL - no database storage needed
+    // The lesson's content_url will be updated with the playback URL after processing
     return reply.code(201).send({
-      id: video.id,
+      id: uploadId,
       uploadUrl,
-      title: video.title,
-      status: video.status,
+      title,
+      status: 'uploading',
     });
   } catch (error) {
     request.log.error(error, 'Failed to create video upload');

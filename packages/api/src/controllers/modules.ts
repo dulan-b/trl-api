@@ -10,7 +10,6 @@ interface CreateModuleBody {
   title: string;
   description?: string;
   order_index: number;
-  is_required?: boolean;
 }
 
 /**
