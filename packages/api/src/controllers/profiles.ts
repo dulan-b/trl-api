@@ -5,6 +5,24 @@ interface ProfileParams {
   id: string;
 }
 
+// Transform database profile to camelCase (matching auth controller format)
+function transformProfile(dbProfile: any) {
+  return {
+    id: dbProfile.id,
+    email: dbProfile.email,
+    fullName: dbProfile.full_name,
+    role: dbProfile.role,
+    bio: dbProfile.bio,
+    subscriptionStatus: dbProfile.subscription_status,
+    subscriptionTier: dbProfile.subscription_tier,
+    avatarUrl: dbProfile.avatar_url,
+    preferredLanguage: dbProfile.preferred_language,
+    showContentInLanguageFirst: dbProfile.show_content_in_language_first,
+    createdAt: dbProfile.created_at,
+    updatedAt: dbProfile.updated_at,
+  };
+}
+
 interface CreateProfileBody {
   id?: string; // Allow passing ID from Supabase auth
   email: string;
@@ -18,13 +36,21 @@ interface CreateProfileBody {
 }
 
 interface UpdateProfileBody {
+  // Accept both camelCase and snake_case for backwards compatibility
   full_name?: string;
+  fullName?: string;
   role?: string;
   subscription_status?: string;
+  subscriptionStatus?: string;
   subscription_tier?: string;
+  subscriptionTier?: string;
   avatar_url?: string;
+  avatarUrl?: string;
   preferred_language?: string;
+  preferredLanguage?: string;
   show_content_in_language_first?: boolean;
+  showContentInLanguageFirst?: boolean;
+  bio?: string;
 }
 
 /**
@@ -173,15 +199,28 @@ export async function updateProfile(
       });
     }
 
-    // Build update object with only provided fields
+    // Build update object with only provided fields (accept both camelCase and snake_case)
     const updateData: Record<string, any> = {};
-    if (updates.full_name !== undefined) updateData.full_name = updates.full_name;
+    if (updates.full_name !== undefined || updates.fullName !== undefined) {
+      updateData.full_name = updates.full_name ?? updates.fullName;
+    }
     if (updates.role !== undefined) updateData.role = updates.role;
-    if (updates.subscription_status !== undefined) updateData.subscription_status = updates.subscription_status;
-    if (updates.subscription_tier !== undefined) updateData.subscription_tier = updates.subscription_tier;
-    if (updates.avatar_url !== undefined) updateData.avatar_url = updates.avatar_url;
-    if (updates.preferred_language !== undefined) updateData.preferred_language = updates.preferred_language;
-    if (updates.show_content_in_language_first !== undefined) updateData.show_content_in_language_first = updates.show_content_in_language_first;
+    if (updates.subscription_status !== undefined || updates.subscriptionStatus !== undefined) {
+      updateData.subscription_status = updates.subscription_status ?? updates.subscriptionStatus;
+    }
+    if (updates.subscription_tier !== undefined || updates.subscriptionTier !== undefined) {
+      updateData.subscription_tier = updates.subscription_tier ?? updates.subscriptionTier;
+    }
+    if (updates.avatar_url !== undefined || updates.avatarUrl !== undefined) {
+      updateData.avatar_url = updates.avatar_url ?? updates.avatarUrl;
+    }
+    if (updates.preferred_language !== undefined || updates.preferredLanguage !== undefined) {
+      updateData.preferred_language = updates.preferred_language ?? updates.preferredLanguage;
+    }
+    if (updates.show_content_in_language_first !== undefined || updates.showContentInLanguageFirst !== undefined) {
+      updateData.show_content_in_language_first = updates.show_content_in_language_first ?? updates.showContentInLanguageFirst;
+    }
+    if (updates.bio !== undefined) updateData.bio = updates.bio;
 
     const result = await sql`
       UPDATE profiles

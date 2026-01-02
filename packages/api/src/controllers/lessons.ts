@@ -49,38 +49,23 @@ export async function createLesson(
   } = request.body;
 
   try {
+    // Use content_type (Supabase column name) instead of lesson_type
     const [lesson] = await sql`
       INSERT INTO lessons (
         module_id,
         title,
         description,
-        lesson_type,
-        video_asset_id,
-        content_markdown,
+        content_type,
         order_index,
-        duration,
-        is_free_preview,
-        is_standalone,
-        poster_url,
-        thumbnail_url,
-        video_duration_seconds,
-        content_data
+        duration
       )
       VALUES (
         ${moduleId || null},
         ${title},
         ${description || null},
-        ${lessonType},
-        ${videoAssetId || null},
-        ${contentMarkdown || null},
+        ${lessonType || 'video'},
         ${orderIndex},
-        ${duration || null},
-        ${isFreePreview},
-        ${isStandalone},
-        ${posterUrl || null},
-        ${thumbnailUrl || null},
-        ${videoDurationSeconds || null},
-        ${contentData ? JSON.stringify(contentData) : null}
+        ${duration || null}
       )
       RETURNING *
     `;
@@ -90,7 +75,7 @@ export async function createLesson(
     return reply.code(201).send({
       id: lesson.id,
       title: lesson.title,
-      lessonType: lesson.lesson_type,
+      lessonType: lesson.content_type,
       orderIndex: lesson.order_index,
       createdAt: lesson.created_at,
     });

@@ -53,22 +53,20 @@ export async function createModule(
   reply: FastifyReply
 ) {
   try {
-    const { track_id, title, description, order_index, is_required = false } = request.body;
+    const { track_id, title, description, order_index } = request.body;
 
     const result = await sql`
       INSERT INTO modules (
         track_id,
         title,
         description,
-        order_index,
-        is_required
+        order_index
       )
       VALUES (
         ${track_id},
         ${title},
         ${description || null},
-        ${order_index},
-        ${is_required}
+        ${order_index}
       )
       RETURNING *
     `;
