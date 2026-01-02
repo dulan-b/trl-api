@@ -159,67 +159,34 @@ export async function updateLesson(
   const updates = request.body;
 
   try {
-    const updateFields: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
+    // Build update object with only defined fields
+    const updateData: Record<string, any> = {};
 
-    if (updates.title !== undefined) {
-      updateFields.push(`title = $${paramIndex++}`);
-      values.push(updates.title);
-    }
-    if (updates.description !== undefined) {
-      updateFields.push(`description = $${paramIndex++}`);
-      values.push(updates.description);
-    }
-    if (updates.videoAssetId !== undefined) {
-      updateFields.push(`video_asset_id = $${paramIndex++}`);
-      values.push(updates.videoAssetId);
-    }
-    if (updates.contentMarkdown !== undefined) {
-      updateFields.push(`content_markdown = $${paramIndex++}`);
-      values.push(updates.contentMarkdown);
-    }
-    if (updates.orderIndex !== undefined) {
-      updateFields.push(`order_index = $${paramIndex++}`);
-      values.push(updates.orderIndex);
-    }
-    if (updates.duration !== undefined) {
-      updateFields.push(`duration = $${paramIndex++}`);
-      values.push(updates.duration);
-    }
-    if (updates.isFreePreview !== undefined) {
-      updateFields.push(`is_free_preview = $${paramIndex++}`);
-      values.push(updates.isFreePreview);
-    }
-    if ((updates as any).posterUrl !== undefined) {
-      updateFields.push(`poster_url = $${paramIndex++}`);
-      values.push((updates as any).posterUrl);
-    }
-    if ((updates as any).thumbnailUrl !== undefined) {
-      updateFields.push(`thumbnail_url = $${paramIndex++}`);
-      values.push((updates as any).thumbnailUrl);
-    }
-    if ((updates as any).videoDurationSeconds !== undefined) {
-      updateFields.push(`video_duration_seconds = $${paramIndex++}`);
-      values.push((updates as any).videoDurationSeconds);
-    }
-    if ((updates as any).contentData !== undefined) {
-      updateFields.push(`content_data = $${paramIndex++}`);
-      values.push(JSON.stringify((updates as any).contentData));
-    }
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.videoAssetId !== undefined) updateData.video_asset_id = updates.videoAssetId;
+    if (updates.contentMarkdown !== undefined) updateData.content_markdown = updates.contentMarkdown;
+    if (updates.orderIndex !== undefined) updateData.order_index = updates.orderIndex;
+    if (updates.duration !== undefined) updateData.duration = updates.duration;
+    if (updates.isFreePreview !== undefined) updateData.is_free_preview = updates.isFreePreview;
+    if ((updates as any).posterUrl !== undefined) updateData.poster_url = (updates as any).posterUrl;
+    if ((updates as any).thumbnailUrl !== undefined) updateData.thumbnail_url = (updates as any).thumbnailUrl;
+    if ((updates as any).videoDurationSeconds !== undefined) updateData.video_duration_seconds = (updates as any).videoDurationSeconds;
+    if ((updates as any).contentData !== undefined) updateData.content_data = JSON.stringify((updates as any).contentData);
 
-    if (updateFields.length === 0) {
+    if (Object.keys(updateData).length === 0) {
       return reply.code(400).send({
         error: 'Bad Request',
         message: 'No fields to update',
       });
     }
 
-    values.push(id);
+    // Add updated_at timestamp
+    updateData.updated_at = new Date();
 
     const [lesson] = await sql`
       UPDATE lessons
-      SET ${sql.unsafe(updateFields.join(', '))}
+      SET ${sql(updateData)}
       WHERE id = ${id}
       RETURNING *
     `;
