@@ -76,7 +76,7 @@ export async function getProfileById(
       });
     }
 
-    return reply.send(result[0]);
+    return reply.send(transformProfile(result[0]));
   } catch (error: any) {
     request.log.error(error);
     return reply.code(500).send({
@@ -169,7 +169,7 @@ export async function createProfile(
           RETURNING *
         `;
 
-    return reply.code(201).send(result[0]);
+    return reply.code(201).send(transformProfile(result[0]));
   } catch (error: any) {
     request.log.error(error);
     return reply.code(500).send({
@@ -236,7 +236,7 @@ export async function updateProfile(
       });
     }
 
-    return reply.send(result[0]);
+    return reply.send(transformProfile(result[0]));
   } catch (error: any) {
     request.log.error(error);
     return reply.code(500).send({
@@ -281,7 +281,7 @@ export async function listProfiles(
     const profiles = await query;
 
     return reply.send({
-      data: profiles,
+      data: profiles.map(transformProfile),
       pagination: {
         limit,
         offset,
